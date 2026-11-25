@@ -1,4 +1,4 @@
-import json
+﻿import json
 import os
 from pathlib import Path
 from typing import Any
@@ -8,7 +8,7 @@ import httpx
 
 load_dotenv()
 
-API_BASE_URL = os.getenv("LIJNET_API_URL", "http://127.0.0.1:8000").rstrip("/")
+API_BASE_URL = os.getenv("LIJNET_API_URL", "https://lijnet.et").rstrip("/")
 TOKEN_STORE_PATH = Path.home() / ".lijnet_mobile_tokens.json"
 
 
