@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420">
+  <rect width="600" height="420" fill="#FAF7F2"/>
+  <circle cx="145" cy="110" r="85" fill="#FEF3C7" opacity="0.8"/>
+  <!-- Handwoven Nursery Basket -->
+  <g transform="translate(175, 95)">
+    <!-- Handles -->
+    <path d="M35,85 C5,85 5,135 42,135" fill="none" stroke="#16697A" stroke-width="7" stroke-linecap="round"/>
+    <path d="M215,85 C245,85 245,135 208,135" fill="none" stroke="#16697A" stroke-width="7" stroke-linecap="round"/>
+    <!-- Basket Body -->
+    <path d="M35,70 L215,70 L195,215 C192,232 178,242 160,242 L90,242 C72,242 58,232 55,215 Z"
+          fill="#FFFFFF" stroke="#16697A" stroke-width="5"/>
+    <rect x="42" y="110" width="166" height="24" fill="#F4A236"/>
+    <rect x="48" y="155" width="154" height="24" fill="#6B9080"/>
+    <rect x="53" y="198" width="144" height="20" fill="#E06D53"/>
+  </g>
+  <text x="300" y="388" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#16697A">HANDWOVEN ETHIOPIAN NURSERY BASKET</text>
+</svg>

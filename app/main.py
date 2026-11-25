@@ -1,8 +1,10 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from urllib.parse import quote
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
@@ -10,14 +12,19 @@ from app.database import Base, engine
 from app.routers import (
     admin,
     auth_api,
+    auth_web,
     checkout,
     orders,
     orders_api,
     products_api,
+    seller,
     storefront,
     telegram,
 )
-from app.services.auth import AdminAuthRequired
+from app.services.auth import AdminAuthRequired, VendorAuthRequired
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+(STATIC_DIR / "images").mkdir(parents=True, exist_ok=True)
 
 
 @asynccontextmanager
@@ -29,9 +36,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     description="Bilingual (English & Amharic) Children's E-Commerce Platform for Addis Ababa, Ethiopia",
-    version="1.2.0",
+    version="1.4.0",
     lifespan=lifespan,
 )
+
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 app.add_middleware(
     SessionMiddleware,
@@ -49,9 +58,22 @@ async def admin_auth_redirect_handler(request: Request, exc: AdminAuthRequired):
 
 # Web & Storefront Routers
 app.include_router(storefront.router)
+app.include_router(auth_web.router)
 app.include_router(checkout.router)
 app.include_router(orders.router)
+
+
+@app.exception_handler(VendorAuthRequired)
+async def vendor_auth_redirect_handler(request: Request, exc: VendorAuthRequired):
+    msg_param = f"&msg={quote(exc.message)}" if exc.message else ""
+    return RedirectResponse(
+        url=f"/login?next={quote(exc.next_url)}{msg_param}",
+        status_code=303,
+    )
+
+
 app.include_router(admin.router)
+app.include_router(seller.router)
 app.include_router(telegram.router)
 
 # Mobile App REST API Routers (/api/v1/*)

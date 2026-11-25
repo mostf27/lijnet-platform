@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420">
+  <rect width="600" height="420" fill="#FAF7F2"/>
+  <circle cx="145" cy="110" r="80" fill="#CCFBF1" opacity="0.8"/>
+  <circle cx="465" cy="310" r="85" fill="#E0F2FE" opacity="0.8"/>
+  <!-- Diaper Pack -->
+  <g transform="translate(185, 70)">
+    <rect x="20" y="30" width="190" height="230" rx="26" fill="#FFFFFF" stroke="#16697A" stroke-width="5"/>
+    <path d="M20,95 Q115,125 210,95 L210,56 C210,41 198,30 184,30 L46,30 C32,30 20,41 20,56 Z" fill="#16697A"/>
+    <!-- Soft Cloud & Sage Leaf -->
+    <circle cx="115" cy="168" r="42" fill="#F0FDF4" stroke="#6B9080" stroke-width="4"/>
+    <path d="M98,175 C98,155 122,145 135,152 C135,172 118,185 98,175 Z" fill="#6B9080"/>
+    <text x="115" y="72" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="800" fill="#F4A236">HYPOALLERGENIC</text>
+  </g>
+  <text x="300" y="388" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#16697A">BREATHABLE SENSITIVE BABY DIAPERS</text>
+</svg>

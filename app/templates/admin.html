@@ -1,168 +1,1505 @@
-{% extends "base.html" %}
-{% block title %}{{ t.admin_title }} — {{ t.brand_name }}{% endblock %}
-{% block content %}
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lijnet (ልጅነት) — Admin, Analytics &amp; Reporting Console</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'sans-serif'],
+          },
+          colors: {
+            mint: {
+              50: '#F0FDF9',
+              100: '#CCFBF1',
+              400: '#5EEAD4',
+              500: '#2DD4BF',
+              600: '#14B8A6',
+              700: '#0F766E',
+            },
+            nile: '#16697A',
+            honey: '#F4A236',
+            terracotta: '#E06D53',
+            canvas: '#F5F7F9',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-canvas text-slate-800 font-sans antialiased">
 
-<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-  <div>
-    <h1 class="font-heading text-2xl font-extrabold text-nile">{{ t.admin_title }}</h1>
-    <p class="text-xs text-stone-500">Signed in as <strong>{{ admin_user.full_name }}</strong> ({{ admin_user.email }})</p>
-  </div>
-  <div class="flex items-center gap-2">
-    <a href="/admin/orders/export-csv" class="bg-honey hover:bg-[#e59326] text-ink font-bold px-4 py-2 rounded-lg text-xs shadow-sm transition">
-      📥 Export Addis Rider Dispatch CSV
-    </a>
-    <form method="post" action="/admin/logout">
-      <button type="submit" class="bg-stone-200 hover:bg-stone-300 text-ink font-semibold px-3.5 py-2 rounded-lg text-xs transition">
-        Logout
-      </button>
-    </form>
-  </div>
-</div>
+<div class="min-h-screen flex">
 
-{% if message %}
-<div class="mb-5 bg-sage/20 border border-sage text-ink px-4 py-3 rounded-xl text-sm font-semibold">
-  ✅ {{ message }}
-</div>
-{% endif %}
+  <!-- LEFT SIDEBAR -->
+  <aside class="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0">
+    <div>
+      <!-- Brand Header -->
+      <div class="px-6 py-6 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-mint-500 to-nile text-white font-extrabold text-xl flex items-center justify-center shadow-sm">
+          ል
+        </div>
+        <div>
+          <div class="font-extrabold text-slate-900 text-base leading-tight">
+            Lijnet <span class="text-mint-600">ልጅነት</span>
+          </div>
+          <div class="text-[11px] text-slate-400 font-medium">Addis Ababa Commerce</div>
+        </div>
+      </div>
 
-<!-- Proclamation No. 1205/2020 Local Content Compliance Dashboard -->
-<section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-  <div class="bg-white rounded-xl border border-stone-200 p-4">
-    <div class="text-xs text-stone-500">Total Active SKUs</div>
-    <div class="text-2xl font-extrabold text-ink mt-1">{{ compliance.total_active_products }}</div>
-  </div>
-  <div class="bg-white rounded-xl border border-stone-200 p-4">
-    <div class="text-xs text-stone-500">🇪🇹 Local Ethiopian SKUs</div>
-    <div class="text-2xl font-extrabold text-sage mt-1">{{ compliance.local_ethiopian_count }} ({{ compliance.local_percentage }}%)</div>
-  </div>
-  <div class="bg-white rounded-xl border border-stone-200 p-4">
-    <div class="text-xs text-stone-500">Imported SKUs</div>
-    <div class="text-2xl font-extrabold text-nile mt-1">{{ compliance.imported_count }} ({{ compliance.imported_percentage }}%)</div>
-  </div>
-  <div class="rounded-xl border p-4 {% if compliance.is_compliant %}bg-sage/15 border-sage{% else %}bg-terracotta/15 border-terracotta{% endif %}">
-    <div class="text-xs font-semibold">Proc. 1205/2020 (&ge;50% Local)</div>
-    <div class="text-xl font-extrabold mt-1 {% if compliance.is_compliant %}text-sage{% else %}text-terracotta{% endif %}">
-      {% if compliance.is_compliant %}COMPLIANT ✓{% else %}ACTION NEEDED ⚠️{% endif %}
+      <!-- Navigation Links -->
+      <nav class="px-4 space-y-1 mt-1" id="sidebarNav">
+        <button type="button" data-tab="overview"
+                class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-semibold transition bg-mint-400/35 text-slate-900">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Dashboard
+          </span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
+
+        <button type="button" data-tab="analytics"
+                class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+            Analytics
+          </span>
+        </button>
+
+        <button type="button" data-tab="products"
+                class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            Products
+          </span>
+          <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{{ products|length }}</span>
+        </button>
+
+        <button type="button" data-tab="inventory"
+                class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Inventory
+          </span>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ 'bg-emerald-100 text-emerald-700' if compliance.is_compliant else 'bg-rose-100 text-rose-700' }}">
+            {{ compliance.local_percentage }}%
+          </span>
+        </button>
+
+        <button type="button" data-tab="orders"
+                class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            Orders
+          </span>
+          <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">{{ kpis.pending_delivery }}</span>
+        </button>
+
+        <button type="button" data-tab="reporting"
+                class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Reporting
+          </span>
+          <span class="text-[10px] font-bold bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full">VAT</span>
+        </button>
+
+        <button type="button" data-tab="customers"
+                class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Customers
+          </span>
+          <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{{ customers|length }}</span>
+        </button>
+
+        <button type="button" data-tab="settings"
+                class="nav-item w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+          <span class="flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Settings
+          </span>
+        </button>
+
+        <a href="/" target="_blank"
+           class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          View Storefront
+        </a>
+      </nav>
     </div>
-  </div>
-</section>
 
-<!-- Courier Dispatch Table -->
-<section class="bg-white rounded-2xl border border-stone-200 p-5 mb-8">
-  <h2 class="font-heading text-lg font-bold text-ink mb-4">🚚 Addis Ababa Order Dispatch Queue</h2>
-  <div class="overflow-x-auto">
-    <table class="w-full text-xs text-left border-collapse">
-      <thead>
-        <tr class="bg-cream border-b border-stone-200 text-ink">
-          <th class="py-2.5 px-3">Order</th>
-          <th class="py-2.5 px-3">Sub-City &amp; Landmark</th>
-          <th class="py-2.5 px-3">Payment</th>
-          <th class="py-2.5 px-3">Total (ETB)</th>
-          <th class="py-2.5 px-3">Status Update</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-stone-100">
-        {% for o in orders %}
-        <tr>
-          <td class="py-2.5 px-3 font-bold text-nile">{{ o.order_number }}</td>
-          <td class="py-2.5 px-3">
-            <div class="font-semibold">{{ o.delivery_address.sub_city }} (Woreda {{ o.delivery_address.woreda }})</div>
-            <div class="text-stone-500">{{ o.delivery_address.landmark_description }}</div>
-            <div class="text-stone-600">{{ o.delivery_address.recipient_name }} &bull; {{ o.delivery_address.recipient_phone }}</div>
-          </td>
-          <td class="py-2.5 px-3">
-            <span class="font-semibold">{{ o.payment_method.value }}</span><br/>
-            <span class="text-[11px] text-stone-500">{{ o.payment_status.value }}</span>
-          </td>
-          <td class="py-2.5 px-3 font-bold">{{ "{:,.2f}".format(o.total_etb) }}</td>
-          <td class="py-2.5 px-3">
-            <form method="post" action="/admin/orders/{{ o.id }}/status" class="flex items-center gap-1.5">
-              <select name="status" class="border border-stone-300 rounded px-2 py-1 text-xs bg-white">
-                {% for st in order_statuses %}
-                <option value="{{ st }}" {% if o.status.value == st %}selected{% endif %}>{{ st }}</option>
-                {% endfor %}
+    <!-- Bottom Admin Info & Logout -->
+    <div class="p-4 border-t border-slate-100">
+      <div class="bg-slate-50 rounded-xl p-3 mb-2">
+        <div class="text-xs font-bold text-slate-800 truncate">{{ admin_user.full_name }}</div>
+        <div class="text-[11px] text-slate-500 truncate">{{ admin_user.email }}</div>
+      </div>
+      <form method="post" action="/admin/logout">
+        <button type="submit"
+                class="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-semibold py-2.5 rounded-xl text-xs transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          Sign Out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- TOP HEADER BAR -->
+    <header class="bg-canvas/90 backdrop-blur border-b border-slate-200/70 px-8 py-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-20">
+      <h1 id="pageHeading" class="text-xl font-extrabold text-slate-900">Overview</h1>
+
+      <!-- Global Filter Search -->
+      <div class="flex-1 max-w-md">
+        <div class="relative">
+          <input id="globalSearchInput" type="text"
+                 placeholder="Search orders, SKUs, Addis sub-cities, parents..."
+                 class="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-mint-500 shadow-2xs" />
+          <svg class="w-4 h-4 text-slate-400 absolute right-3.5 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Right Action Pills -->
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-2xs">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span>{{ today_label }}</span>
+        </div>
+
+        <a href="/admin/orders/export-csv"
+           class="bg-nile hover:bg-[#125563] text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-2xs transition flex items-center gap-1.5">
+          <span>📥</span>
+          <span>Rider CSV</span>
+        </a>
+
+        <button type="button" onclick="switchTab('orders')" title="Pending Deliveries"
+                class="relative bg-white border border-slate-200 p-2.5 rounded-xl text-slate-600 hover:text-nile transition shadow-2xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          {% if kpis.pending_delivery > 0 %}
+          <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-terracotta text-white text-[10px] font-bold flex items-center justify-center">
+            {{ kpis.pending_delivery }}
+          </span>
+          {% endif %}
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT BODY -->
+    <main class="p-8 space-y-6">
+
+      {% if message %}
+      <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-xs font-semibold flex items-center justify-between">
+        <span>✅ {{ message }}</span>
+        <a href="/admin" class="text-emerald-700 underline">Dismiss</a>
+      </div>
+      {% endif %}
+
+      <!-- ================================================================ -->
+      <!-- TAB 1: DASHBOARD OVERVIEW                                        -->
+      <!-- ================================================================ -->
+      <section id="tab-overview" class="tab-panel space-y-6">
+
+        <!-- ROW 1: 4 KPI STAT CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm font-bold text-slate-800">Total Revenue</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">Active ETB Sales</div>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-mint-50 text-mint-600 flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline justify-between gap-2">
+              <div class="text-2xl font-extrabold text-slate-900">
+                {{ "{:,.0f}".format(kpis.total_revenue_etb) }} <span class="text-xs font-bold text-slate-500">ETB</span>
+              </div>
+              <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                ↗ +15% VAT Incl.
+              </span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm font-bold text-slate-800">Total Order</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">Addis Ababa Orders</div>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline justify-between gap-2">
+              <div class="text-2xl font-extrabold text-slate-900">{{ kpis.total_orders }}</div>
+              <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                ↗ Active
+              </span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm font-bold text-slate-800">Total Customer</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">Registered Parents</div>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline justify-between gap-2">
+              <div class="text-2xl font-extrabold text-slate-900">{{ kpis.total_customers }}</div>
+              <span class="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">
+                Web + Mobile + TG
+              </span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm font-bold text-slate-800">Pending Delivery</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">Awaiting Rider Drop-off</div>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+              </div>
+            </div>
+            <div class="mt-4 flex items-baseline justify-between gap-2">
+              <div class="text-2xl font-extrabold text-slate-900">{{ kpis.pending_delivery }}</div>
+              <button type="button" onclick="switchTab('orders')"
+                      class="text-[11px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-2.5 py-0.5 rounded-full transition">
+                Dispatch →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2: SALES ANALYTIC AREA CHART + CONCENTRIC TARGET RING -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div class="lg:col-span-8 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <h2 class="text-base font-extrabold text-slate-900">Sales Analytic</h2>
+              <button type="button" onclick="switchTab('analytics')"
+                      class="text-xs font-semibold text-nile bg-mint-50 border border-mint-100 px-3 py-1 rounded-lg hover:bg-mint-100 transition">
+                Deep Analytics →
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+              <div>
+                <div class="text-[11px] text-slate-400 font-semibold">Gross Sales</div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-base font-extrabold text-slate-900">{{ "{:,.2f}".format(kpis.total_revenue_etb) }}</span>
+                  <span class="text-[10px] font-bold bg-sky-50 text-sky-600 px-1.5 py-0.5 rounded">ETB</span>
+                </div>
+              </div>
+              <div>
+                <div class="text-[11px] text-slate-400 font-semibold">Courier Fees</div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-base font-extrabold text-slate-900">{{ "{:,.2f}".format(kpis.delivery_fees_etb) }}</span>
+                  <span class="text-[10px] font-bold bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded">Addis</span>
+                </div>
+              </div>
+              <div>
+                <div class="text-[11px] text-slate-400 font-semibold">Net Revenue (Excl. 15% VAT)</div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-base font-extrabold text-slate-900">{{ "{:,.2f}".format(kpis.net_excl_vat_etb) }}</span>
+                  <span class="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded">MoR Net</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="h-56 w-full">
+              <canvas id="salesAreaChart"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-extrabold text-slate-900">Sales &amp; Local Target</h2>
+              <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full {{ 'bg-emerald-100 text-emerald-700' if compliance.is_compliant else 'bg-rose-100 text-rose-700' }}">
+                {{ "COMPLIANT" if compliance.is_compliant else "NON-COMPLIANT" }}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 items-center gap-3 my-4">
+              <div class="space-y-4">
+                <div>
+                  <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <span class="w-2.5 h-1.5 rounded-full bg-slate-500 inline-block"></span>
+                    <span>Local Content</span>
+                  </div>
+                  <div class="text-base font-extrabold text-slate-900 mt-0.5">
+                    {{ compliance.local_percentage }}%
+                  </div>
+                  <div class="text-[10px] text-slate-400">Min {{ settings_data.local_content_min_pct }}% (Proc. 1205/2020)</div>
+                </div>
+
+                <div>
+                  <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                    <span class="w-2.5 h-1.5 rounded-full bg-mint-500 inline-block"></span>
+                    <span>Monthly Goal</span>
+                  </div>
+                  <div class="text-base font-extrabold text-slate-900 mt-0.5">
+                    {{ "{:,.0f}".format(kpis.monthly_target_etb) }}
+                  </div>
+                  <div class="text-[10px] text-slate-400">{{ kpis.monthly_target_pct }}% achieved</div>
+                </div>
+              </div>
+
+              <div class="h-44 w-44 mx-auto">
+                <canvas id="targetRingChart"></canvas>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-500 bg-slate-50 rounded-xl px-3 py-2">
+              <strong>{{ compliance.local_ethiopian_count }}</strong> of <strong>{{ compliance.total_active_products }}</strong> active SKUs are Made in Ethiopia.
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 3: TOP SELLING PRODUCTS + CURRENT POLICY -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div class="lg:col-span-8 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-base font-extrabold text-slate-900">Top Selling Products</h2>
+              <button type="button" onclick="switchTab('products')"
+                      class="text-xs font-bold text-nile hover:underline">
+                Manage All Products →
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+              {% for tp in top_products %}
+              <div class="group bg-slate-50/80 hover:bg-white rounded-xl p-2.5 border border-slate-200/60 hover:shadow-sm transition">
+                <div class="aspect-square rounded-lg bg-slate-100 overflow-hidden mb-2.5 flex items-center justify-center">
+                  <img src="{{ tp.image_url }}" alt="{{ tp.title_en }}"
+                       onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                       class="w-full h-full object-cover" />
+                  <div style="display:none;" class="w-full h-full items-center justify-center bg-mint-50 text-nile font-extrabold text-lg">
+                    ል
+                  </div>
+                </div>
+                <div class="text-xs font-bold text-slate-900 truncate" title="{{ tp.title_en }}">
+                  {{ tp.title_en }}
+                </div>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="text-[11px] text-slate-400 font-semibold">{{ tp.units_sold }} Pcs</span>
+                  <span class="text-[11px] font-bold text-nile">{{ "{:,.0f}".format(tp.price_etb) }}</span>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-base font-extrabold text-slate-900">Current Offer &amp; Policy</h2>
+              <button type="button" onclick="switchTab('settings')" class="text-xs font-bold text-nile hover:underline">Edit</button>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="font-bold text-slate-800">Local Content Mandate</span>
+                  <span class="text-[11px] text-slate-400">Target ≥ {{ settings_data.local_content_min_pct }}%</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-mint-500 rounded-full" style="width: {{ [compliance.local_percentage, 100]|min }}%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="font-bold text-slate-800">Free Delivery ≥ {{ "{:,.0f}".format(settings_data.free_delivery_threshold_etb) }} ETB</span>
+                  <span class="text-[11px] text-slate-400">{{ kpis.free_delivery_pct }}% of orders</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-slate-500 rounded-full" style="width: {{ [kpis.free_delivery_pct, 100]|min }}%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="font-bold text-slate-800">COD Ceiling ≤ {{ "{:,.0f}".format(settings_data.cod_max_limit_etb) }} ETB</span>
+                  <span class="text-[11px] text-emerald-600 font-semibold">Active Rule</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-amber-400 rounded-full" style="width: 100%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- TAB 2: ANALYTICS (Sub-Cities, Gateways & Category Performance)   -->
+      <!-- ================================================================ -->
+      <section id="tab-analytics" class="tab-panel hidden space-y-6">
+
+        <!-- Analytics KPI Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs">
+            <div class="text-xs font-bold text-slate-500">Average Order Value (AOV)</div>
+            <div class="text-2xl font-extrabold text-slate-900 mt-2">
+              {{ "{:,.2f}".format(kpis.aov_etb) }} <span class="text-xs font-bold text-slate-400">ETB</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-1">Across active Addis Ababa orders</div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs">
+            <div class="text-xs font-bold text-slate-500">Paid Settlement Rate</div>
+            <div class="text-2xl font-extrabold text-emerald-600 mt-2">{{ kpis.paid_rate_pct }}%</div>
+            <div class="text-[11px] text-slate-400 mt-1">{{ "{:,.2f}".format(kpis.paid_revenue_etb) }} ETB settled</div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs">
+            <div class="text-xs font-bold text-slate-500">15% Output VAT Liability</div>
+            <div class="text-2xl font-extrabold text-nile mt-2">
+              {{ "{:,.2f}".format(kpis.vat_collected_etb) }} <span class="text-xs font-bold text-slate-400">ETB</span>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-1">MoR TIN {{ settings_data.seller_tin }}</div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs">
+            <div class="text-xs font-bold text-slate-500">7-Day Return / Refund Rate</div>
+            <div class="text-2xl font-extrabold text-amber-600 mt-2">{{ kpis.return_rate_pct }}%</div>
+            <div class="text-[11px] text-slate-400 mt-1">{{ kpis.returned_orders_count }} order(s) under Proc. 1205/2020</div>
+          </div>
+        </div>
+
+        <!-- Charts Row: Payment Gateways & Sub-City Demand -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div class="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+            <h2 class="text-base font-extrabold text-slate-900 mb-1">Revenue by Payment Gateway</h2>
+            <p class="text-xs text-slate-400 mb-4">Chapa, Telebirr, SantimPay, CBE Transfer &amp; COD</p>
+            <div class="h-56">
+              <canvas id="paymentGatewayChart"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+            <h2 class="text-base font-extrabold text-slate-900 mb-1">Demand by Addis Ababa Sub-City</h2>
+            <p class="text-xs text-slate-400 mb-4">Gross order value (ETB) across delivery zones</p>
+            <div class="h-56">
+              <canvas id="subcityBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Chart + Breakdown Tables -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div class="lg:col-span-5 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+            <h2 class="text-base font-extrabold text-slate-900 mb-1">Sales by Child Stage Category</h2>
+            <p class="text-xs text-slate-400 mb-4">Baby Care, Apparel, Educational Toys &amp; Nursery</p>
+            <div class="h-52">
+              <canvas id="categoryBarChart"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+            <h2 class="text-base font-extrabold text-slate-900 mb-3">Payment &amp; Sub-City Performance Matrix</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div>
+                <div class="font-bold text-slate-700 mb-2">Payment Channels</div>
+                <div class="space-y-2">
+                  {% for pb in payment_breakdown %}
+                  <div class="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl">
+                    <div>
+                      <span class="font-bold text-slate-800">{{ pb.method }}</span>
+                      <span class="text-slate-400 ml-1">({{ pb.count }})</span>
+                    </div>
+                    <div class="font-extrabold text-nile">{{ "{:,.0f}".format(pb.total_etb) }} ETB ({{ pb.share_pct }}%)</div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div>
+                <div class="font-bold text-slate-700 mb-2">Top Addis Sub-Cities</div>
+                <div class="space-y-2">
+                  {% for sb in subcity_breakdown[:5] %}
+                  <div class="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl">
+                    <div>
+                      <span class="font-bold text-slate-800">{{ sb.sub_city }}</span>
+                      <span class="text-slate-400 ml-1">({{ sb.count }})</span>
+                    </div>
+                    <div class="font-extrabold text-slate-900">{{ "{:,.0f}".format(sb.total_etb) }} ETB ({{ sb.share_pct }}%)</div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- TAB 3: PRODUCTS (Create Bilingual Product)                       -->
+      <!-- ================================================================ -->
+      <section id="tab-products" class="tab-panel hidden space-y-6">
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+          <h2 class="text-base font-extrabold text-slate-900 mb-4">+ Add New Bilingual Product (EN / አማ)</h2>
+          <form method="post" action="/admin/products/create" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">SKU Code</label>
+              <input type="text" name="sku" required placeholder="LIJ-LOC-099"
+                     class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">English Title</label>
+              <input type="text" name="title_en" required placeholder="Organic Cotton Baby Blanket"
+                     class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Amharic Title (አማርኛ)</label>
+              <input type="text" name="title_am" required placeholder="የኢትዮጵያ ጥጥ የሕፃን ብርድ ልብስ"
+                     class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+            </div>
+
+            <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">English Description</label>
+                <input type="text" name="description_en" required placeholder="Hypoallergenic highland cotton blanket"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Amharic Description (አማርኛ)</label>
+                <input type="text" name="description_am" required placeholder="ለስላሳ የኢትዮጵያ ጥጥ ብርድ ልብስ"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Category</label>
+              <select name="category" class="w-full border border-slate-300 rounded-xl px-3 py-2">
+                {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
               </select>
-              <button type="submit" class="bg-nile text-white px-2.5 py-1 rounded text-xs font-semibold">Save</button>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Age Range</label>
+              <select name="age_range" class="w-full border border-slate-300 rounded-xl px-3 py-2">
+                {% for a in age_ranges %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Origin (Proc. 1205/2020)</label>
+              <select name="origin_type" class="w-full border border-slate-300 rounded-xl px-3 py-2">
+                {% for o in origin_types %}<option value="{{ o }}">{{ o }}</option>{% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Price (ETB, Incl. 15% VAT)</label>
+              <input type="number" step="0.01" name="price_etb" required placeholder="1950.00"
+                     class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Initial Stock Count</label>
+              <input type="number" name="stock_count" required value="20"
+                     class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Vendor</label>
+              <select name="vendor_id" class="w-full border border-slate-300 rounded-xl px-3 py-2">
+                {% for v in vendors %}<option value="{{ v.id }}">{{ v.full_name }}</option>{% endfor %}
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block font-semibold text-slate-700 mb-1">Image URL (Defaults to Lijnet SVG if blank)</label>
+              <input type="text" name="image_url" placeholder="/static/images/default-product.svg"
+                     class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+            </div>
+            <div class="flex items-end">
+              <button type="submit"
+                      class="w-full bg-nile hover:bg-[#125563] text-white font-bold py-2.5 rounded-xl transition">
+                Save Bilingual Product
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- TAB 4: INVENTORY & PROCLAMATION 1205/2020 COMPLIANCE             -->
+      <!-- ================================================================ -->
+      <section id="tab-inventory" class="tab-panel hidden space-y-6">
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-900">Inventory &amp; Price Management</h2>
+              <p class="text-xs text-slate-500">
+                Local Ethiopian Content: <strong>{{ compliance.local_percentage }}%</strong> ({{ compliance.local_ethiopian_count }}/{{ compliance.total_active_products }} active SKUs) —
+                <span class="font-bold {{ 'text-emerald-600' if compliance.is_compliant else 'text-rose-600' }}">
+                  {{ "COMPLIANT" if compliance.is_compliant else "NON-COMPLIANT" }}
+                </span>
+              </p>
+            </div>
+            <a href="/admin/reports/inventory-csv"
+               class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3.5 py-2 rounded-xl text-xs transition">
+              📥 Export Inventory CSV
+            </a>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-400 uppercase text-[11px]">
+                  <th class="py-3 px-2">SKU</th>
+                  <th class="py-3 px-2">Product (EN / አማ)</th>
+                  <th class="py-3 px-2">Origin</th>
+                  <th class="py-3 px-2">Age</th>
+                  <th class="py-3 px-2">Price (ETB) &amp; Stock</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                {% for p in products %}
+                <tr class="searchable-row hover:bg-slate-50">
+                  <td class="py-3 px-2 font-mono font-bold text-slate-700">{{ p.sku }}</td>
+                  <td class="py-3 px-2">
+                    <div class="font-bold text-slate-900">{{ p.title_en }}</div>
+                    <div class="text-slate-500">{{ p.title_am }}</div>
+                  </td>
+                  <td class="py-3 px-2">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ 'bg-emerald-100 text-emerald-700' if p.origin_type.value == 'LOCAL_ETHIOPIAN' else 'bg-slate-100 text-slate-600' }}">
+                      {{ p.origin_type.value }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-2 font-semibold">{{ p.age_range.value }}</td>
+                  <td class="py-3 px-2">
+                    <form method="post" action="/admin/products/{{ p.id }}/stock" class="flex items-center gap-2">
+                      <input type="number" step="0.01" name="price_etb" value="{{ p.price_etb }}"
+                             class="w-24 border border-slate-300 rounded-lg px-2 py-1" />
+                      <input type="number" name="stock_count" value="{{ p.stock_count }}"
+                             class="w-20 border border-slate-300 rounded-lg px-2 py-1" />
+                      <button type="submit"
+                              class="bg-mint-600 hover:bg-mint-700 text-white font-bold px-3 py-1 rounded-lg transition">
+                        Update
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- TAB 5: ORDERS & ADDIS ABABA COURIER DISPATCH                     -->
+      <!-- ================================================================ -->
+      <section id="tab-orders" class="tab-panel hidden space-y-6">
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-900">Addis Ababa Orders &amp; Rider Dispatch</h2>
+              <p class="text-xs text-slate-500">Update delivery statuses, download 15% VAT invoices, or export rider CSV.</p>
+            </div>
+            <a href="/admin/orders/export-csv"
+               class="bg-honey hover:bg-[#e59326] text-slate-900 font-bold px-4 py-2 rounded-xl text-xs transition">
+              📥 Export Addis Rider Dispatch CSV
+            </a>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-400 uppercase text-[11px]">
+                  <th class="py-3 px-2">Order</th>
+                  <th class="py-3 px-2">Recipient &amp; Landmark</th>
+                  <th class="py-3 px-2">Payment</th>
+                  <th class="py-3 px-2">Total (ETB)</th>
+                  <th class="py-3 px-2">VAT PDF</th>
+                  <th class="py-3 px-2">Dispatch Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                {% for o in orders %}
+                <tr class="searchable-row hover:bg-slate-50">
+                  <td class="py-3 px-2">
+                    <div class="font-bold text-nile">{{ o.order_number }}</div>
+                    <div class="text-[11px] text-slate-400">{{ o.items|length }} item(s)</div>
+                  </td>
+                  <td class="py-3 px-2">
+                    <div class="font-bold text-slate-800">{{ o.delivery_address.recipient_name }} ({{ o.delivery_address.recipient_phone }})</div>
+                    <div class="text-slate-500">{{ o.delivery_address.sub_city }} W.{{ o.delivery_address.woreda }} — {{ o.delivery_address.landmark_description }}</div>
+                  </td>
+                  <td class="py-3 px-2">
+                    <span class="font-semibold">{{ o.payment_method.value }}</span>
+                    <div class="text-[10px] font-bold {{ 'text-emerald-600' if o.payment_status.value == 'PAID' else 'text-amber-600' }}">
+                      {{ o.payment_status.value }}
+                    </div>
+                  </td>
+                  <td class="py-3 px-2 font-extrabold text-slate-900">{{ "{:,.2f}".format(o.total_etb) }}</td>
+                  <td class="py-3 px-2">
+                    <a href="/orders/{{ o.id }}/invoice.pdf" target="_blank"
+                       class="inline-block bg-slate-100 hover:bg-nile hover:text-white text-slate-700 font-bold px-2.5 py-1 rounded-lg transition">
+                      📄 PDF
+                    </a>
+                  </td>
+                  <td class="py-3 px-2">
+                    <form method="post" action="/admin/orders/{{ o.id }}/status" class="flex items-center gap-1.5">
+                      <select name="status" class="border border-slate-300 rounded-lg px-2 py-1 text-xs">
+                        {% for st in order_statuses %}
+                        <option value="{{ st }}" {% if st == o.status.value %}selected{% endif %}>{{ st }}</option>
+                        {% endfor %}
+                      </select>
+                      <button type="submit"
+                              class="bg-nile hover:bg-[#125563] text-white font-bold px-2.5 py-1 rounded-lg transition">
+                        Save
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- TAB 6: REPORTING (Daily, Weekly, Monthly, Yearly & Statutory)    -->
+      <!-- ================================================================ -->
+      <section id="tab-reporting" class="tab-panel hidden space-y-6">
+
+        <!-- 1. PERIOD-BASED ITEMIZED SALES REPORT (Daily / Weekly / Monthly / Yearly) -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs space-y-5">
+
+          <!-- Header & Period Sub-Tabs -->
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base font-extrabold text-slate-900">{{ report_window.title }}</h2>
+                <span class="text-xs font-bold bg-mint-50 text-nile px-2.5 py-0.5 rounded-full">
+                  {{ report_window.display_range }}
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Itemized sales &amp; receivable ledger (EAT / UTC+3) with Beginning Balance, Debit, Credit, Running Balance &amp; 15% VAT.
+              </p>
+            </div>
+
+            <!-- Sub-Navigation Pills: Daily | Weekly | Monthly | Yearly | All-Time -->
+            <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-xl text-xs">
+              <a href="/admin?period=daily&report_date={{ report_window.report_date_iso }}#reporting"
+                 class="px-3.5 py-1.5 rounded-lg font-bold transition {{ 'bg-white text-nile shadow-2xs' if report_window.period == 'daily' else 'text-slate-600 hover:text-slate-900' }}">
+                Daily
+              </a>
+              <a href="/admin?period=weekly&report_week={{ report_window.report_week_iso }}#reporting"
+                 class="px-3.5 py-1.5 rounded-lg font-bold transition {{ 'bg-white text-nile shadow-2xs' if report_window.period == 'weekly' else 'text-slate-600 hover:text-slate-900' }}">
+                Weekly
+              </a>
+              <a href="/admin?period=monthly&report_month={{ report_window.report_month_iso }}#reporting"
+                 class="px-3.5 py-1.5 rounded-lg font-bold transition {{ 'bg-white text-nile shadow-2xs' if report_window.period == 'monthly' else 'text-slate-600 hover:text-slate-900' }}">
+                Monthly
+              </a>
+              <a href="/admin?period=yearly&report_year={{ report_window.report_year }}#reporting"
+                 class="px-3.5 py-1.5 rounded-lg font-bold transition {{ 'bg-white text-nile shadow-2xs' if report_window.period == 'yearly' else 'text-slate-600 hover:text-slate-900' }}">
+                Yearly
+              </a>
+              <a href="/admin?period=all#reporting"
+                 class="px-3.5 py-1.5 rounded-lg font-bold transition {{ 'bg-white text-nile shadow-2xs' if report_window.period == 'all' else 'text-slate-600 hover:text-slate-900' }}">
+                All-Time
+              </a>
+            </div>
+          </div>
+
+          <!-- Context-Aware Period Filter Controls & CSV Download -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50/90 p-3.5 rounded-xl border border-slate-200/60 text-xs">
+            <form method="get" action="/admin#reporting" class="flex flex-wrap items-center gap-2.5">
+              <input type="hidden" name="period" value="{{ report_window.period }}" />
+
+              {% if report_window.period == 'daily' %}
+              <label class="font-bold text-slate-700">Select Day:</label>
+              <input type="date" name="report_date" value="{{ report_window.report_date_iso }}"
+                     class="border border-slate-300 bg-white rounded-xl px-3 py-1.5 font-semibold text-slate-700" />
+              <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-1.5 rounded-xl transition">Apply</button>
+              <a href="/admin?period=daily&report_date={{ report_window.today_iso }}#reporting"
+                 class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-100">Today</a>
+              {% if latest_sale_date_iso != report_window.today_iso %}
+              <a href="/admin?period=daily&report_date={{ latest_sale_date_iso }}#reporting"
+                 class="px-3 py-1.5 rounded-xl border border-mint-300 bg-mint-50 font-bold text-nile hover:bg-mint-100">Latest ({{ latest_sale_date_iso }})</a>
+              {% endif %}
+
+              {% elif report_window.period == 'weekly' %}
+              <label class="font-bold text-slate-700">Select ISO Week:</label>
+              <input type="week" name="report_week" value="{{ report_window.report_week_iso }}"
+                     class="border border-slate-300 bg-white rounded-xl px-3 py-1.5 font-semibold text-slate-700" />
+              <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-1.5 rounded-xl transition">Apply</button>
+              <a href="/admin?period=weekly&report_week={{ report_window.current_week_iso }}#reporting"
+                 class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-100">This Week</a>
+
+              {% elif report_window.period == 'monthly' %}
+              <label class="font-bold text-slate-700">Select Month:</label>
+              <input type="month" name="report_month" value="{{ report_window.report_month_iso }}"
+                     class="border border-slate-300 bg-white rounded-xl px-3 py-1.5 font-semibold text-slate-700" />
+              <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-1.5 rounded-xl transition">Apply</button>
+              <a href="/admin?period=monthly&report_month={{ report_window.current_month_iso }}#reporting"
+                 class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-100">This Month</a>
+
+              {% elif report_window.period == 'yearly' %}
+              <label class="font-bold text-slate-700">Select Year:</label>
+              <input type="number" name="report_year" min="2020" max="2099" value="{{ report_window.report_year }}"
+                     class="w-28 border border-slate-300 bg-white rounded-xl px-3 py-1.5 font-semibold text-slate-700" />
+              <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-1.5 rounded-xl transition">Apply</button>
+              <a href="/admin?period=yearly&report_year={{ report_window.current_year }}#reporting"
+                 class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-100">This Year</a>
+
+              {% else %}
+              <span class="font-semibold text-slate-600">Showing complete chronological sales history across all dates.</span>
+              {% endif %}
             </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
 
-<!-- Bilingual Product Creation Form -->
-<section class="bg-white rounded-2xl border border-stone-200 p-5 mb-8">
-  <h2 class="font-heading text-lg font-bold text-ink mb-4">➕ Add New Bilingual Product</h2>
-  <form method="post" action="/admin/products/create" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-    <input type="text" name="sku" required placeholder="SKU (e.g., LIJ-LOC-007)" class="border rounded-lg px-3 py-2" />
-    <input type="text" name="title_en" required placeholder="English Title" class="border rounded-lg px-3 py-2" />
-    <input type="text" name="title_am" required placeholder="የአማርኛ ርዕስ (Amharic Title)" class="border rounded-lg px-3 py-2" />
+            <a href="/admin/reports/sales-ledger-csv?period={{ report_window.period }}&report_date={{ report_window.report_date_iso }}&report_week={{ report_window.report_week_iso }}&report_month={{ report_window.report_month_iso }}&report_year={{ report_window.report_year }}"
+               class="bg-nile hover:bg-[#125563] text-white font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+              <span>??</span>
+              <span>Export {{ report_window.title }} (CSV)</span>
+            </a>
+          </div>
 
-    <textarea name="description_en" required placeholder="English Description" rows="2" class="border rounded-lg px-3 py-2 md:col-span-3"></textarea>
-    <textarea name="description_am" required placeholder="የአማርኛ መግለጫ (Amharic Description)" rows="2" class="border rounded-lg px-3 py-2 md:col-span-3"></textarea>
+          <!-- 4 Period Accounting Summary Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="bg-slate-50/70 rounded-xl p-4 border border-slate-200/70">
+              <div class="text-[11px] font-bold text-slate-500 uppercase">Beginning Balance</div>
+              <div class="text-xl font-extrabold text-slate-900 mt-1">
+                {{ "{:,.2f}".format(sales_ledger.opening_balance_etb) }} <span class="text-xs font-bold text-slate-400">ETB</span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Brought forward prior to {{ report_window.display_range }}</div>
+            </div>
 
-    <select name="category" class="border rounded-lg px-3 py-2 bg-white">
-      {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-    </select>
-    <select name="age_range" class="border rounded-lg px-3 py-2 bg-white">
-      {% for a in age_ranges %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
-    </select>
-    <select name="origin_type" class="border rounded-lg px-3 py-2 bg-white">
-      {% for ot in origin_types %}<option value="{{ ot }}">{{ ot }}</option>{% endfor %}
-    </select>
+            <div class="bg-slate-50/70 rounded-xl p-4 border border-slate-200/70">
+              <div class="text-[11px] font-bold text-slate-500 uppercase">Total Debit (Sales Billed)</div>
+              <div class="text-xl font-extrabold text-nile mt-1">
+                {{ "{:,.2f}".format(sales_ledger.total_debit_etb) }} <span class="text-xs font-bold text-slate-400">ETB</span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-0.5">{{ sales_ledger.total_qty }} unit(s) sold (Incl. {{ "{:,.2f}".format(sales_ledger.total_vat_etb) }} ETB VAT)</div>
+            </div>
 
-    <input type="number" step="0.01" name="price_etb" required placeholder="Price (ETB)" class="border rounded-lg px-3 py-2" />
-    <input type="number" name="stock_count" required placeholder="Stock Count" class="border rounded-lg px-3 py-2" />
-    <select name="vendor_id" class="border rounded-lg px-3 py-2 bg-white">
-      {% for v in vendors %}<option value="{{ v.id }}">{{ v.full_name }} ({{ v.role.value }})</option>{% endfor %}
-    </select>
+            <div class="bg-slate-50/70 rounded-xl p-4 border border-slate-200/70">
+              <div class="text-[11px] font-bold text-slate-500 uppercase">Total Credit (Collected / Paid)</div>
+              <div class="text-xl font-extrabold text-emerald-600 mt-1">
+                {{ "{:,.2f}".format(sales_ledger.total_credit_etb) }} <span class="text-xs font-bold text-slate-400">ETB</span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Settled digital &amp; collected COD</div>
+            </div>
 
-    <input type="url" name="image_url" placeholder="Product Image URL (optional)" class="border rounded-lg px-3 py-2 md:col-span-2" />
-    <button type="submit" class="bg-nile hover:bg-[#125563] text-white font-bold py-2 px-4 rounded-lg">
-      Create Product
-    </button>
-  </form>
-</section>
+            <div class="bg-slate-50/70 rounded-xl p-4 border border-slate-200/70">
+              <div class="text-[11px] font-bold text-slate-500 uppercase">Closing Balance (Receivable)</div>
+              <div class="text-xl font-extrabold text-amber-700 mt-1">
+                {{ "{:,.2f}".format(sales_ledger.closing_balance_etb) }} <span class="text-xs font-bold text-slate-400">ETB</span>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Beginning + Debit &minus; Credit</div>
+            </div>
+          </div>
 
-<!-- Quick Inventory Editor -->
-<section class="bg-white rounded-2xl border border-stone-200 p-5">
-  <h2 class="font-heading text-lg font-bold text-ink mb-4">📦 Inventory &amp; Pricing Control</h2>
-  <div class="overflow-x-auto">
-    <table class="w-full text-xs text-left border-collapse">
-      <thead>
-        <tr class="bg-cream border-b border-stone-200">
-          <th class="py-2 px-3">SKU</th>
-          <th class="py-2 px-3">Product (EN / AM)</th>
-          <th class="py-2 px-3">Origin</th>
-          <th class="py-2 px-3">Price &amp; Stock</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-stone-100">
-        {% for p in products %}
-        <tr>
-          <td class="py-2 px-3 font-mono font-semibold">{{ p.sku }}</td>
-          <td class="py-2 px-3">
-            <div class="font-semibold">{{ p.title_en }}</div>
-            <div class="text-stone-500">{{ p.title_am }}</div>
-          </td>
-          <td class="py-2 px-3">
-            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {% if p.origin_type.value == 'LOCAL_ETHIOPIAN' %}bg-sage text-white{% else %}bg-stone-100 text-stone-700{% endif %}">
-              {{ p.origin_type.value }}
-            </span>
-          </td>
-          <td class="py-2 px-3">
-            <form method="post" action="/admin/products/{{ p.id }}/stock" class="flex items-center gap-2">
-              <input type="number" step="0.01" name="price_etb" value="{{ p.price_etb }}" class="w-24 border rounded px-2 py-1" />
-              <input type="number" name="stock_count" value="{{ p.stock_count }}" class="w-16 border rounded px-2 py-1" />
-              <button type="submit" class="bg-sage text-white px-2.5 py-1 rounded font-semibold">Update</button>
+          <!-- Itemized Ledger Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 uppercase text-[10px] bg-slate-50">
+                  <th class="py-3 px-2.5">Date / Order</th>
+                  <th class="py-3 px-2.5">Sales Item (SKU)</th>
+                  <th class="py-3 px-2.5 text-center">Qty</th>
+                  <th class="py-3 px-2.5 text-right">Unit Price</th>
+                  <th class="py-3 px-2.5 text-right">Beginning Bal.</th>
+                  <th class="py-3 px-2.5 text-right text-nile">Debit (Sales)</th>
+                  <th class="py-3 px-2.5 text-right text-emerald-700">Credit (Paid)</th>
+                  <th class="py-3 px-2.5 text-right font-extrabold text-slate-800">Balance</th>
+                  <th class="py-3 px-2.5 text-right">15% VAT</th>
+                  <th class="py-3 px-2.5">Payment / Customer</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                {% for r in sales_ledger.rows %}
+                <tr class="searchable-row hover:bg-slate-50">
+                  <td class="py-3 px-2.5 whitespace-nowrap">
+                    <div class="font-bold text-nile">{{ r.order_number }}</div>
+                    <div class="text-[10px] text-slate-400 font-mono">{{ r.timestamp_eat }}</div>
+                  </td>
+                  <td class="py-3 px-2.5">
+                    <div class="font-bold text-slate-900">{{ r.title_en }}</div>
+                    <div class="text-[11px] text-slate-500">
+                      <span class="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">{{ r.sku }}</span>
+                      {{ r.title_am }}
+                    </div>
+                  </td>
+                  <td class="py-3 px-2.5 text-center font-extrabold text-slate-800">{{ r.quantity }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono">{{ "{:,.2f}".format(r.unit_price_etb) }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono text-slate-500">{{ "{:,.2f}".format(r.beginning_balance_etb) }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono font-bold text-nile">{{ "{:,.2f}".format(r.debit_etb) }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono font-bold text-emerald-600">{{ "{:,.2f}".format(r.credit_etb) }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono font-extrabold {{ 'text-amber-700' if r.balance_etb > 0 else 'text-slate-900' }}">
+                    {{ "{:,.2f}".format(r.balance_etb) }}
+                  </td>
+                  <td class="py-3 px-2.5 text-right font-mono text-slate-500">{{ "{:,.2f}".format(r.vat_15_etb) }}</td>
+                  <td class="py-3 px-2.5 whitespace-nowrap">
+                    <div class="font-semibold text-slate-800">{{ r.customer_name }} ({{ r.sub_city }})</div>
+                    <div class="text-[10px] font-bold {{ 'text-emerald-600' if r.payment_status == 'PAID' else 'text-amber-600' }}">
+                      {{ r.payment_method }} &bull; {{ r.payment_status }}
+                    </div>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="10" class="py-8 text-center text-slate-400">
+                    No sales items recorded for <strong>{{ report_window.display_range }}</strong>.
+                    <a href="/admin?period=yearly&report_year={{ report_window.current_year }}#reporting" class="text-nile font-bold underline ml-1">
+                      Switch to Yearly ({{ report_window.current_year }})
+                    </a>
+                    or
+                    <a href="/admin?period=all#reporting" class="text-nile font-bold underline ml-1">
+                      All-Time Ledger
+                    </a>.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              {% if sales_ledger.rows %}
+              <tfoot>
+                <tr class="border-t-2 border-slate-300 bg-slate-50 font-extrabold text-slate-900">
+                  <td colspan="2" class="py-3 px-2.5 text-right uppercase text-[11px]">{{ report_window.title }} Totals (ETB):</td>
+                  <td class="py-3 px-2.5 text-center">{{ sales_ledger.total_qty }}</td>
+                  <td class="py-3 px-2.5 text-right">?</td>
+                  <td class="py-3 px-2.5 text-right font-mono text-slate-600">{{ "{:,.2f}".format(sales_ledger.opening_balance_etb) }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono text-nile">{{ "{:,.2f}".format(sales_ledger.total_debit_etb) }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono text-emerald-700">{{ "{:,.2f}".format(sales_ledger.total_credit_etb) }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono text-amber-700">{{ "{:,.2f}".format(sales_ledger.closing_balance_etb) }}</td>
+                  <td class="py-3 px-2.5 text-right font-mono text-slate-600">{{ "{:,.2f}".format(sales_ledger.total_vat_etb) }}</td>
+                  <td class="py-3 px-2.5"></td>
+                </tr>
+              </tfoot>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. STATUTORY TAX, COMPLIANCE & COURIER EXPORT CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Report 1: Ministry of Revenues 15% VAT Register -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-extrabold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-lg">MoR Tax Filing</span>
+                <span class="text-[11px] font-mono text-slate-400">TIN {{ settings_data.seller_tin }}</span>
+              </div>
+              <h3 class="text-base font-extrabold text-slate-900">15% VAT Sales Register</h3>
+              <p class="text-xs text-slate-500 mt-1">
+                Line-by-line sequential fiscal invoices separating VAT-exclusive taxable base and 15% output VAT.
+              </p>
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-1 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Taxable Base (Excl. VAT):</span>
+                  <span class="font-bold">{{ "{:,.2f}".format(kpis.net_excl_vat_etb) }} ETB</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Output VAT (15%):</span>
+                  <span class="font-extrabold text-nile">{{ "{:,.2f}".format(kpis.vat_collected_etb) }} ETB</span>
+                </div>
+              </div>
+            </div>
+
+            <a href="/admin/reports/vat-csv"
+               class="mt-5 w-full text-center bg-nile hover:bg-[#125563] text-white font-bold py-2.5 rounded-xl text-xs transition">
+              ?? Download 15% VAT Register (CSV)
+            </a>
+          </div>
+
+          <!-- Report 2: Proclamation 1205/2020 Inventory & Local Content Audit -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-extrabold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg">Proc. 1205/2020</span>
+                <span class="text-[11px] font-bold text-emerald-700">{{ compliance.local_percentage }}% Local</span>
+              </div>
+              <h3 class="text-base font-extrabold text-slate-900">Inventory &amp; Origin Audit</h3>
+              <p class="text-xs text-slate-500 mt-1">
+                Complete SKU valuation, safety certification flags, hygiene seal flags, and Made-in-Ethiopia ratio.
+              </p>
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-1 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Active Catalog SKUs:</span>
+                  <span class="font-bold">{{ compliance.total_active_products }} SKUs</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Stock Retail Valuation:</span>
+                  <span class="font-extrabold text-slate-900">{{ "{:,.2f}".format(kpis.inventory_value_etb) }} ETB</span>
+                </div>
+              </div>
+            </div>
+
+            <a href="/admin/reports/inventory-csv"
+               class="mt-5 w-full text-center bg-mint-600 hover:bg-mint-700 text-white font-bold py-2.5 rounded-xl text-xs transition">
+              ?? Download Inventory Audit (CSV)
+            </a>
+          </div>
+
+          <!-- Report 3: Addis Ababa COD & Courier Reconciliation -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-extrabold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg">Courier &amp; COD</span>
+                <span class="text-[11px] font-bold text-slate-500">Addis Ababa</span>
+              </div>
+              <h3 class="text-base font-extrabold text-slate-900">Rider Dispatch &amp; COD Sheet</h3>
+              <p class="text-xs text-slate-500 mt-1">
+                Sub-city landmarks, GPS pins, recipient phones, and exact ETB cash-on-delivery collection amounts.
+              </p>
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-1 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Digital Settled (Paid):</span>
+                  <span class="font-bold text-emerald-600">{{ "{:,.2f}".format(kpis.paid_revenue_etb) }} ETB</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Pending / COD Collection:</span>
+                  <span class="font-extrabold text-amber-700">{{ "{:,.2f}".format(kpis.unpaid_revenue_etb) }} ETB</span>
+                </div>
+              </div>
+            </div>
+
+            <a href="/admin/orders/export-csv"
+               class="mt-5 w-full text-center bg-honey hover:bg-[#e59326] text-slate-900 font-bold py-2.5 rounded-xl text-xs transition">
+              ?? Download Rider &amp; COD Sheet (CSV)
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. SEQUENTIAL FISCAL 15% VAT INVOICE LEDGER -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+          <h3 class="text-base font-extrabold text-slate-900 mb-3">Sequential Fiscal 15% VAT Invoice Ledger</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-400 uppercase text-[11px]">
+                  <th class="py-3 px-2">Fiscal No.</th>
+                  <th class="py-3 px-2">Order No.</th>
+                  <th class="py-3 px-2">Recipient</th>
+                  <th class="py-3 px-2">Status</th>
+                  <th class="py-3 px-2 text-right">Gross Total (ETB)</th>
+                  <th class="py-3 px-2 text-right">Official PDF</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                {% for o in orders[:15] %}
+                <tr class="searchable-row hover:bg-slate-50">
+                  <td class="py-2.5 px-2 font-mono font-bold text-slate-700">FS-{{ o.created_at.year }}-{{ "%06d"|format(o.id) }}</td>
+                  <td class="py-2.5 px-2 font-bold text-nile">{{ o.order_number }}</td>
+                  <td class="py-2.5 px-2">{{ o.delivery_address.recipient_name }} ({{ o.delivery_address.sub_city }})</td>
+                  <td class="py-2.5 px-2">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ 'bg-emerald-100 text-emerald-700' if o.payment_status.value == 'PAID' else 'bg-amber-100 text-amber-700' }}">
+                      {{ o.payment_status.value }}
+                    </span>
+                  </td>
+                  <td class="py-2.5 px-2 text-right font-extrabold">{{ "{:,.2f}".format(o.total_etb) }}</td>
+                  <td class="py-2.5 px-2 text-right">
+                    <a href="/orders/{{ o.id }}/invoice.pdf" target="_blank"
+                       class="inline-block bg-slate-100 hover:bg-nile hover:text-white text-slate-700 font-bold px-2.5 py-1 rounded-lg transition">
+                      ?? View VAT PDF
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+<!-- ================================================================ -->
+      <!-- TAB 7: CUSTOMERS                                                 -->
+      <!-- ================================================================ -->
+      <section id="tab-customers" class="tab-panel hidden space-y-6">
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+          <h2 class="text-base font-extrabold text-slate-900 mb-4">Registered Addis Ababa Parents</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-400 uppercase text-[11px]">
+                  <th class="py-3 px-2">Parent Name</th>
+                  <th class="py-3 px-2">Phone</th>
+                  <th class="py-3 px-2">Email</th>
+                  <th class="py-3 px-2">Telegram Linked</th>
+                  <th class="py-3 px-2">Language</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                {% for c in customers %}
+                <tr class="searchable-row hover:bg-slate-50">
+                  <td class="py-3 px-2 font-bold text-slate-900">{{ c.full_name }}</td>
+                  <td class="py-3 px-2 font-mono">{{ c.phone_number }}</td>
+                  <td class="py-3 px-2 text-slate-600">{{ c.email }}</td>
+                  <td class="py-3 px-2">
+                    {% if c.telegram_chat_id %}
+                    <span class="bg-sky-50 text-sky-700 font-bold px-2 py-0.5 rounded-full">@lijnet_et Linked</span>
+                    {% else %}
+                    <span class="text-slate-400">Not linked</span>
+                    {% endif %}
+                  </td>
+                  <td class="py-3 px-2 uppercase font-bold">{{ c.preferred_lang }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- TAB 8: SETTINGS (MoR TIN/VAT, Delivery Rules & Integrations)     -->
+      <!-- ================================================================ -->
+      <section id="tab-settings" class="tab-panel hidden space-y-6">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Left 7 Cols: Legal Entity, MoR TIN/VAT & Compliance Thresholds -->
+          <div class="lg:col-span-7 bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+            <h2 class="text-base font-extrabold text-slate-900 mb-1">Business, MoR Tax &amp; Compliance Rules</h2>
+            <p class="text-xs text-slate-400 mb-4">Appears on 15% VAT PDF receipts and governs Addis Ababa checkout validations.</p>
+
+            <form method="post" action="/admin/settings/update" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div class="sm:col-span-2">
+                <label class="block font-semibold text-slate-700 mb-1">Registered Legal Entity Name</label>
+                <input type="text" name="legal_name" required value="{{ settings_data.legal_name }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Ethiopian MoR Seller TIN</label>
+                <input type="text" name="seller_tin" required value="{{ settings_data.seller_tin }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono" />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">VAT Registration No.</label>
+                <input type="text" name="seller_vat_reg_no" required value="{{ settings_data.seller_vat_reg_no }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono" />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">VAT Registration Date</label>
+                <input type="text" name="seller_vat_reg_date" required value="{{ settings_data.seller_vat_reg_date }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono" />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Statutory Return Window (Days)</label>
+                <input type="number" name="statutory_return_days" required value="{{ settings_data.statutory_return_days }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block font-semibold text-slate-700 mb-1">Registered Addis Ababa Business Address</label>
+                <input type="text" name="seller_address" required value="{{ settings_data.seller_address }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Free Delivery Threshold (ETB)</label>
+                <input type="number" step="0.01" name="free_delivery_threshold_etb" required
+                       value="{{ settings_data.free_delivery_threshold_etb }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">COD Maximum Ceiling (ETB)</label>
+                <input type="number" step="0.01" name="cod_max_limit_etb" required
+                       value="{{ settings_data.cod_max_limit_etb }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block font-semibold text-slate-700 mb-1">Proclamation 1205/2020 Local Content Mandate (%)</label>
+                <input type="number" step="0.1" name="local_content_min_pct" required
+                       value="{{ settings_data.local_content_min_pct }}"
+                       class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+              </div>
+
+              <div class="sm:col-span-2 pt-2">
+                <button type="submit"
+                        class="w-full bg-nile hover:bg-[#125563] text-white font-bold py-2.5 rounded-xl transition">
+                  Save Business &amp; Compliance Settings
+                </button>
+              </div>
             </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </div>
+
+          <!-- Right 5 Cols: Addis Sub-City Delivery Schedule & Integrations -->
+          <div class="lg:col-span-5 space-y-5">
+            <!-- Sub-City Delivery Fee Schedule -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs">
+              <h2 class="text-base font-extrabold text-slate-900 mb-1">Addis Ababa Sub-City Fees (ETB)</h2>
+              <p class="text-xs text-slate-400 mb-3">Flat courier rate per sub-city when order is below free threshold.</p>
+
+              <form method="post" action="/admin/settings/subcity-fees" class="space-y-2.5 text-xs">
+                <div class="grid grid-cols-2 gap-2.5 max-h-64 overflow-y-auto pr-1">
+                  {% for sc, fee in settings_data.subcity_fees.items() %}
+                  <div class="bg-slate-50 px-3 py-2 rounded-xl flex items-center justify-between gap-2">
+                    <label class="font-semibold text-slate-700 truncate" title="{{ sc }}">{{ sc }}</label>
+                    <input type="number" step="0.01" name="fee_{{ sc }}" value="{{ fee }}"
+                           class="w-20 border border-slate-300 bg-white rounded-lg px-2 py-1 text-right font-mono" />
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-mint-600 hover:bg-mint-700 text-white font-bold py-2.5 rounded-xl transition mt-2">
+                  Update Sub-City Delivery Fees
+                </button>
+              </form>
+            </div>
+
+            <!-- Gateways & Telegram Bot Status -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs space-y-3 text-xs">
+              <h2 class="text-base font-extrabold text-slate-900">Gateways &amp; @{{ settings_data.telegram_username }} Bot</h2>
+
+              <div class="flex items-center justify-between bg-slate-50 px-3.5 py-2.5 rounded-xl">
+                <span class="font-bold text-slate-800">Chapa Payment Gateway</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold {{ 'bg-emerald-100 text-emerald-700' if settings_data.chapa_configured else 'bg-amber-100 text-amber-800' }}">
+                  {{ "LIVE KEY SET" if settings_data.chapa_configured else "SANDBOX MODE" }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between bg-slate-50 px-3.5 py-2.5 rounded-xl">
+                <span class="font-bold text-slate-800">Telegram Bot (@{{ settings_data.telegram_username }})</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold {{ 'bg-emerald-100 text-emerald-700' if settings_data.telegram_configured else 'bg-amber-100 text-amber-800' }}">
+                  {{ "TOKEN CONNECTED" if settings_data.telegram_configured else "SIMULATED MODE" }}
+                </span>
+              </div>
+
+              <form method="post" action="/admin/settings/telegram-webhook">
+                <button type="submit"
+                        class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl transition">
+                  Register Webhook ({{ settings_data.base_url }}/telegram/webhook)
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
   </div>
-</section>
-{% endblock %}
+</div>
+
+<script>
+  const TAB_TITLES = {
+    overview: "Overview",
+    analytics: "Analytics",
+    products: "Products",
+    inventory: "Inventory & Compliance",
+    orders: "Orders & Dispatch",
+    reporting: "Reporting & MoR VAT",
+    customers: "Customers",
+    settings: "Platform Settings"
+  };
+
+  function switchTab(tabName) {
+    if (!TAB_TITLES[tabName]) tabName = "overview";
+    document.getElementById("pageHeading").textContent = TAB_TITLES[tabName];
+
+    document.querySelectorAll(".tab-panel").forEach((panel) => {
+      panel.classList.toggle("hidden", panel.id !== `tab-${tabName}`);
+    });
+
+    document.querySelectorAll(".nav-item").forEach((btn) => {
+      const isActive = btn.dataset.tab === tabName;
+      btn.classList.toggle("bg-mint-400/35", isActive);
+      btn.classList.toggle("text-slate-900", isActive);
+      btn.classList.toggle("font-semibold", isActive);
+      btn.classList.toggle("text-slate-600", !isActive);
+      btn.classList.toggle("font-medium", !isActive);
+    });
+
+    history.replaceState(null, "", `#${tabName}`);
+  }
+
+  document.querySelectorAll(".nav-item").forEach((btn) => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+
+  // Global live search across tables
+  document.getElementById("globalSearchInput").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll(".searchable-row").forEach((row) => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+
+  // Restore active tab from URL hash
+  const initialHash = window.location.hash.replace("#", "");
+  if (initialHash && TAB_TITLES[initialHash]) {
+    switchTab(initialHash);
+  }
+
+  // 1. Overview: Sales Analytic Smooth Area Chart
+  const salesCtx = document.getElementById("salesAreaChart");
+  if (salesCtx && window.Chart) {
+    const grad = salesCtx.getContext("2d").createLinearGradient(0, 0, 0, 220);
+    grad.addColorStop(0, "rgba(45, 212, 191, 0.35)");
+    grad.addColorStop(1, "rgba(45, 212, 191, 0.0)");
+
+    new Chart(salesCtx, {
+      type: "line",
+      data: {
+        labels: {{ chart_labels_json | safe }},
+        datasets: [{
+          label: "Daily Sales (ETB)",
+          data: {{ chart_values_json | safe }},
+          borderColor: "#2DD4BF",
+          borderWidth: 2.5,
+          backgroundColor: grad,
+          fill: true,
+          tension: 0.42,
+          pointRadius: 3,
+          pointBackgroundColor: "#14B8A6"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: "#94A3B8", font: { size: 11 } } },
+          y: {
+            beginAtZero: true,
+            border: { display: false },
+            grid: { color: "#F1F5F9" },
+            ticks: { color: "#94A3B8", font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  // 2. Overview: Concentric Target Ring
+  const ringCtx = document.getElementById("targetRingChart");
+  if (ringCtx && window.Chart) {
+    const localPct = {{ compliance.local_percentage }};
+    const monthlyPct = {{ kpis.monthly_target_pct }};
+
+    new Chart(ringCtx, {
+      type: "doughnut",
+      data: {
+        datasets: [
+          {
+            label: "Monthly Target",
+            data: [monthlyPct, Math.max(0, 100 - monthlyPct)],
+            backgroundColor: ["#5EEAD4", "#E2E8F0"],
+            borderWidth: 0,
+            borderRadius: 20
+          },
+          {
+            label: "Local Ethiopian Content",
+            data: [localPct, Math.max(0, 100 - localPct)],
+            backgroundColor: ["#64748B", "#F1F5F9"],
+            borderWidth: 0,
+            borderRadius: 20
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "58%",
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  // 3. Analytics: Payment Gateway Doughnut Chart
+  const payCtx = document.getElementById("paymentGatewayChart");
+  if (payCtx && window.Chart) {
+    new Chart(payCtx, {
+      type: "doughnut",
+      data: {
+        labels: {{ payment_labels_json | safe }},
+        datasets: [{
+          data: {{ payment_values_json | safe }},
+          backgroundColor: ["#16697A", "#2DD4BF", "#F4A236", "#E06D53", "#64748B"],
+          borderWidth: 2,
+          borderColor: "#FFFFFF"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "62%",
+        plugins: {
+          legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } }
+        }
+      }
+    });
+  }
+
+  // 4. Analytics: Addis Ababa Sub-City Horizontal Bar Chart
+  const scCtx = document.getElementById("subcityBarChart");
+  if (scCtx && window.Chart) {
+    new Chart(scCtx, {
+      type: "bar",
+      data: {
+        labels: {{ subcity_labels_json | safe }},
+        datasets: [{
+          label: "Sales (ETB)",
+          data: {{ subcity_values_json | safe }},
+          backgroundColor: "#2DD4BF",
+          borderRadius: 8
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, grid: { color: "#F1F5F9" }, ticks: { font: { size: 10 } } },
+          y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+  }
+
+  // 5. Analytics: Product Category Bar Chart
+  const catCtx = document.getElementById("categoryBarChart");
+  if (catCtx && window.Chart) {
+    new Chart(catCtx, {
+      type: "bar",
+      data: {
+        labels: {{ category_labels_json | safe }},
+        datasets: [{
+          label: "Category Sales (ETB)",
+          data: {{ category_values_json | safe }},
+          backgroundColor: ["#16697A", "#6B9080", "#F4A236", "#E06D53"],
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+          y: { beginAtZero: true, grid: { color: "#F1F5F9" }, ticks: { font: { size: 10 } } }
+        }
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

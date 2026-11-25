@@ -1,0 +1,108 @@
+﻿{% extends "base.html" %}
+{% block title %}Register — {{ t.brand_name }}{% endblock %}
+{% block content %}
+
+<div class="max-w-lg mx-auto my-8 bg-white rounded-2xl border border-stone-200 p-7 shadow-sm">
+  <div class="text-center mb-6">
+    <div class="w-12 h-12 mx-auto rounded-xl bg-nile text-honey font-heading font-extrabold text-2xl flex items-center justify-center mb-3">
+      ል
+    </div>
+    <h1 class="font-heading text-xl font-extrabold text-nile">
+      {{ "Create Your Lijnet Account" if lang == "en" else "የልጅነት መለያ ይፍጠሩ" }}
+    </h1>
+    <p class="text-xs text-stone-500 mt-1">
+      {{ "Choose whether you are registering as a Buyer or a Product Owner / Seller." if lang == "en" else "እንደ ገዢ ወይም እንደ የምርት ባለቤት / ሻጭ መመዝገብዎን ይምረጡ።" }}
+    </p>
+  </div>
+
+  {% if error %}
+  <div class="mb-4 bg-terracotta/15 border border-terracotta text-terracotta px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+    ⚠️ {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="post" action="/register" class="space-y-4">
+    <input type="hidden" name="next_url" value="{{ next_url }}" />
+
+    <!-- ACCOUNT TYPE SELECTOR: BUYER vs PRODUCT OWNER / SELLER -->
+    <div>
+      <label class="block text-xs font-bold text-stone-700 mb-2">
+        {{ "Select Account Role *" if lang == "en" else "የመለያ ዓይነት ይምረጡ *" }}
+      </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label class="cursor-pointer">
+          <input type="radio" name="account_type" value="BUYER" class="peer sr-only" checked />
+          <div class="rounded-xl border-2 border-stone-200 peer-checked:border-nile peer-checked:bg-nile/5 p-3.5 transition h-full">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-sm text-nile">🛍️ {{ "Buyer" if lang == "en" else "ገዢ (ወላጅ)" }}</span>
+              <span class="text-[10px] font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">Parent</span>
+            </div>
+            <p class="text-[11px] text-stone-500 mt-1.5 leading-relaxed">
+              {{ "Shop children's essentials, checkout with Addis delivery & download 15% VAT invoices." if lang == "en" else "የሕፃናት እቃዎችን ይግዙ፣ በአዲስ አበባ ይቀበሉ እና የ15% ቫት ደረሰኝ ያውርዱ።" }}
+            </p>
+          </div>
+        </label>
+
+        <label class="cursor-pointer">
+          <input type="radio" name="account_type" value="PRODUCT_OWNER" class="peer sr-only" />
+          <div class="rounded-xl border-2 border-stone-200 peer-checked:border-honey peer-checked:bg-honey/10 p-3.5 transition h-full">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-sm text-stone-900">🏪 {{ "Product Owner / Seller" if lang == "en" else "የምርት ባለቤት / ሻጭ" }}</span>
+              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Seller</span>
+            </div>
+            <p class="text-[11px] text-stone-500 mt-1.5 leading-relaxed">
+              {{ "Register as a brand owner or merchant to supply verified kids' goods on Lijnet." if lang == "en" else "የተረጋገጡ የልጆች ምርቶችን በልጅነት ላይ ለማቅረብ እና ለመሸጥ ይመዝገቡ።" }}
+            </p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold text-stone-700 mb-1">
+        {{ "Full Name or Business Name *" if lang == "en" else "ሙሉ ስም ወይም የድርጅት ስም *" }}
+      </label>
+      <input type="text" name="full_name" required placeholder="e.g. Tigist Alemu or Addis Kids Wear PLC"
+             class="w-full border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-nile focus:outline-none" />
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-semibold text-stone-700 mb-1">
+          {{ "Email Address *" if lang == "en" else "ኢሜይል *" }}
+        </label>
+        <input type="email" name="email" required placeholder="name@example.et"
+               class="w-full border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-nile focus:outline-none" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-stone-700 mb-1">
+          {{ "Ethiopian Phone *" if lang == "en" else "ስልክ ቁጥር *" }}
+        </label>
+        <input type="text" name="phone_number" required placeholder="+251911223344"
+               class="w-full border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-nile focus:outline-none" />
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold text-stone-700 mb-1">
+        {{ "Password (Min 6 characters) *" if lang == "en" else "የይለፍ ቃል (ቢያንስ 6 ፊደላት) *" }}
+      </label>
+      <input type="password" name="password" required minlength="6" placeholder="••••••••"
+             class="w-full border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-nile focus:outline-none" />
+    </div>
+
+    <button type="submit"
+            class="w-full bg-nile hover:bg-[#125563] text-white font-bold py-2.5 rounded-xl text-sm transition">
+      {{ "Complete Registration & Continue" if lang == "en" else "ምዝገባውን ያጠናቅቁና ይቀጥሉ" }}
+    </button>
+  </form>
+
+  <div class="mt-5 pt-4 border-t border-stone-100 text-center text-xs text-stone-600">
+    {{ "Already have an account?" if lang == "en" else "ቀድሞውኑ መለያ አለዎት?" }}
+    <a href="/login?next={{ next_url | urlencode }}" class="font-bold text-nile hover:underline ml-1">
+      {{ "Sign In Here" if lang == "en" else "እዚህ ይግቡ" }}
+    </a>
+  </div>
+</div>
+{% endblock %}

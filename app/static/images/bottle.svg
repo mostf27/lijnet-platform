@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420">
+  <rect width="600" height="420" fill="#FAF7F2"/>
+  <circle cx="130" cy="95" r="70" fill="#E0F2FE" opacity="0.7"/>
+  <circle cx="485" cy="330" r="95" fill="#FEF3C7" opacity="0.8"/>
+  <!-- Feeding Bottle 1 -->
+  <g transform="translate(215, 72)">
+    <path d="M52,32 C52,10 78,10 78,32 L84,56 L46,56 Z" fill="#F4A236"/>
+    <rect x="36" y="54" width="58" height="22" rx="8" fill="#16697A"/>
+    <rect x="30" y="76" width="70" height="190" rx="22" fill="#FFFFFF" stroke="#16697A" stroke-width="5"/>
+    <rect x="35" y="135" width="60" height="126" rx="17" fill="#E0F2FE"/>
+    <line x1="44" y1="115" x2="62" y2="115" stroke="#16697A" stroke-width="3" stroke-linecap="round"/>
+    <line x1="44" y1="145" x2="56" y2="145" stroke="#16697A" stroke-width="3" stroke-linecap="round"/>
+    <line x1="44" y1="175" x2="62" y2="175" stroke="#16697A" stroke-width="3" stroke-linecap="round"/>
+    <line x1="44" y1="205" x2="56" y2="205" stroke="#16697A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- Feeding Bottle 2 (Smaller) -->
+  <g transform="translate(312, 118) rotate(8)">
+    <path d="M42,26 C42,8 64,8 64,26 L68,46 L38,46 Z" fill="#E06D53"/>
+    <rect x="30" y="44" width="46" height="18" rx="6" fill="#16697A"/>
+    <rect x="25" y="62" width="56" height="150" rx="18" fill="#FFFFFF" stroke="#16697A" stroke-width="4.5"/>
+    <rect x="29" y="110" width="48" height="98" rx="14" fill="#FEF3C7"/>
+  </g>
+  <text x="300" y="388" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#16697A">BPA-FREE SILICONE FEEDING SET</text>
+</svg>

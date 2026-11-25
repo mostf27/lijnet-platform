@@ -1,0 +1,63 @@
+﻿{% extends "base.html" %}
+{% block title %}Sign In — {{ t.brand_name }}{% endblock %}
+{% block content %}
+
+<div class="max-w-md mx-auto my-8 bg-white rounded-2xl border border-stone-200 p-7 shadow-sm">
+  <div class="text-center mb-6">
+    <div class="w-12 h-12 mx-auto rounded-xl bg-nile text-honey font-heading font-extrabold text-2xl flex items-center justify-center mb-3">
+      ል
+    </div>
+    <h1 class="font-heading text-xl font-extrabold text-nile">
+      {{ "Sign In to Lijnet" if lang == "en" else "ወደ ልጅነት ይግቡ" }}
+    </h1>
+    <p class="text-xs text-stone-500 mt-1">
+      {{ "Access your cart, track Addis Ababa orders, or manage your storefront account." if lang == "en" else "ወደ ቅርጫትዎ ለመግባት፣ ትዕዛዝ ለመከታተል ወይም መለያዎን ለማስተዳደር ይግቡ።" }}
+    </p>
+  </div>
+
+  {% if info_msg %}
+  <div class="mb-4 bg-amber-50 border border-amber-200 text-amber-900 px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+    🛒 {{ info_msg }}
+  </div>
+  {% endif %}
+
+  {% if error %}
+  <div class="mb-4 bg-terracotta/15 border border-terracotta text-terracotta px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+    ⚠️ {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="post" action="/login" class="space-y-4">
+    <input type="hidden" name="next_url" value="{{ next_url }}" />
+
+    <div>
+      <label class="block text-xs font-semibold text-stone-700 mb-1">
+        {{ "Email or Ethiopian Phone" if lang == "en" else "ኢሜይል ወይም ስልክ ቁጥር" }}
+      </label>
+      <input type="text" name="identifier" required autofocus
+             placeholder="selam@example.et or 0913445566"
+             class="w-full border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-nile focus:outline-none" />
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold text-stone-700 mb-1">
+        {{ "Password" if lang == "en" else "የይለፍ ቃል" }}
+      </label>
+      <input type="password" name="password" required placeholder="••••••••••••"
+             class="w-full border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-nile focus:outline-none" />
+    </div>
+
+    <button type="submit"
+            class="w-full bg-nile hover:bg-[#125563] text-white font-bold py-2.5 rounded-xl text-sm transition">
+      {{ "Sign In & Continue" if lang == "en" else "ይግቡና ይቀጥሉ" }}
+    </button>
+  </form>
+
+  <div class="mt-5 pt-4 border-t border-stone-100 text-center text-xs text-stone-600">
+    {{ "New to Lijnet?" if lang == "en" else "አዲስ ተጠቃሚ ነዎት?" }}
+    <a href="/register?next={{ next_url | urlencode }}" class="font-bold text-nile hover:underline ml-1">
+      {{ "Create an Account (Buyer or Product Owner)" if lang == "en" else "ይመዝገቡ (ገዢ ወይም የምርት ባለቤት)" }}
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420">
+  <rect width="600" height="420" fill="#FAF7F2"/>
+  <circle cx="140" cy="110" r="85" fill="#FEF3C7" opacity="0.85"/>
+  <circle cx="470" cy="310" r="80" fill="#CCFBF1" opacity="0.7"/>
+  <!-- Gift Box -->
+  <g transform="translate(185, 85)">
+    <!-- Ribbon Bow -->
+    <path d="M115,48 C82,12 45,35 75,55 L115,55 Z" fill="#E06D53"/>
+    <path d="M115,48 C148,12 185,35 155,55 L115,55 Z" fill="#E06D53"/>
+    <!-- Box Lid -->
+    <rect x="10" y="55" width="210" height="38" rx="10" fill="#16697A"/>
+    <!-- Box Body -->
+    <rect x="20" y="93" width="190" height="165" rx="14" fill="#FFFFFF" stroke="#16697A" stroke-width="5"/>
+    <!-- Vertical Ribbon -->
+    <rect x="102" y="55" width="26" height="203" fill="#F4A236"/>
+    <!-- Center Emblem -->
+    <circle cx="115" cy="172" r="28" fill="#16697A"/>
+    <text x="115" y="182" text-anchor="middle" font-family="sans-serif" font-size="26" font-weight="800" fill="#F4A236">?</text>
+  </g>
+  <text x="300" y="388" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#16697A">LIJNET NEWBORN STARTER GIFT BOX</text>
+</svg>

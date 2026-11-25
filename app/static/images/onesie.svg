@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420">
+  <rect width="600" height="420" fill="#FAF7F2"/>
+  <circle cx="480" cy="90" r="80" fill="#DCFCE7" opacity="0.7"/>
+  <circle cx="115" cy="330" r="85" fill="#FEF3C7" opacity="0.8"/>
+  <!-- Cotton Onesie Silhouette -->
+  <g transform="translate(175, 58)">
+    <path d="M75,20 L175,20 L238,72 L208,115 L175,92 L175,235 C175,268 148,285 125,285 C102,285 75,268 75,235 L75,92 L42,115 L12,72 Z"
+          fill="#FFFFFF" stroke="#16697A" stroke-width="5" stroke-linejoin="round"/>
+    <!-- Neckline -->
+    <path d="M98,20 Q125,48 152,20" fill="none" stroke="#16697A" stroke-width="4.5"/>
+    <!-- Ethiopian Tibeb Woven Chest Band -->
+    <rect x="78" y="120" width="94" height="8" fill="#6B9080"/>
+    <rect x="78" y="128" width="94" height="8" fill="#F4A236"/>
+    <rect x="78" y="136" width="94" height="8" fill="#E06D53"/>
+    <!-- Snap Buttons -->
+    <circle cx="112" cy="268" r="3.5" fill="#16697A"/>
+    <circle cx="125" cy="271" r="3.5" fill="#16697A"/>
+    <circle cx="138" cy="268" r="3.5" fill="#16697A"/>
+  </g>
+  <text x="300" y="388" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#6B9080">100% ETHIOPIAN HIGHLAND COTTON</text>
+</svg>

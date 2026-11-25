@@ -64,7 +64,9 @@
         <a href="/" class="hover:text-nile transition">{{ t.nav_home }}</a>
         <a href="/#starter-bundles" class="hover:text-nile transition hidden md:inline">{{ t.nav_bundles }}</a>
         <a href="/orders" class="hover:text-nile transition">{{ t.nav_orders }}</a>
+{% if request.session.get("admin_user_id") %}
         <a href="/admin" class="hover:text-nile transition text-stone-600">{{ t.nav_admin }}</a>
+{% endif %}
 
         <!-- Bilingual Switcher -->
         <div class="flex items-center rounded-lg border border-stone-200 overflow-hidden text-xs">

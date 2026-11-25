@@ -2,7 +2,7 @@
 from typing import Any, Callable
 import flet as ft
 
-from app_client.api import ApiError
+from app_client.api import API_BASE_URL, ApiError
 from app_client.state import AppState
 from app_client.theme import ACCENT, BACKGROUND, BORDER, ECO, INK, MUTED, PRIMARY, SURFACE
 
@@ -96,7 +96,7 @@ def build_shop_view(state: AppState, on_cart_updated: Callable[[], None]) -> ft.
                 spacing=8,
                 controls=[
                     ft.Image(
-                        src=prod.get("image_url", ""),
+                        src=(f"{API_BASE_URL}{prod['image_url']}" if str(prod.get("image_url", "")).startswith("/") else prod.get("image_url", "")),
                         height=150,
                         width=460,
                         fit=ft.BoxFit.COVER,

@@ -1,0 +1,497 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lijnet (ልጅነት) — Product Owner &amp; Seller Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'sans-serif'],
+          },
+          colors: {
+            nile: '#16697A',
+            honey: '#F4A236',
+            terracotta: '#E06D53',
+            sage: '#6B9080',
+            canvas: '#F5F7F9',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-canvas text-slate-800 font-sans antialiased">
+
+<div class="min-h-screen flex flex-col lg:flex-row">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="w-full lg:w-64 bg-white border-b lg:border-b-0 lg:border-r border-slate-200/80 flex flex-col justify-between shrink-0">
+    <div>
+      <!-- Brand Header -->
+      <div class="px-6 py-5 flex items-center justify-between lg:justify-start gap-3 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-nile text-honey font-extrabold text-xl flex items-center justify-center shadow-sm">
+            ል
+          </div>
+          <div>
+            <div class="font-extrabold text-slate-900 text-base leading-tight">
+              Lijnet <span class="text-nile">Seller</span>
+            </div>
+            <div class="text-[11px] text-slate-400 font-medium">Product Owner Workspace</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="px-4 py-3 flex lg:flex-col gap-1.5 overflow-x-auto" id="sellerNav">
+        <button type="button" data-panel="my-products"
+                class="seller-nav-btn flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-nile text-white whitespace-nowrap transition">
+          <span>📦 My Catalog</span>
+          <span class="text-[11px] bg-white/20 px-2 py-0.5 rounded-full">{{ kpis.total_products }}</span>
+        </button>
+
+        <button type="button" data-panel="add-product"
+                class="seller-nav-btn flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 whitespace-nowrap transition">
+          <span>➕ Add Bilingual Product</span>
+        </button>
+
+        <button type="button" data-panel="my-orders"
+                class="seller-nav-btn flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 whitespace-nowrap transition">
+          <span>🚚 Orders for My Items</span>
+          <span class="text-[11px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">{{ kpis.total_orders }}</span>
+        </button>
+
+        <a href="/"
+           class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 whitespace-nowrap transition">
+          <span>🛍️ Back to Storefront</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Seller Profile & Verification Status -->
+    <div class="p-4 border-t border-slate-100 hidden lg:block">
+      <div class="bg-slate-50 rounded-xl p-3.5 mb-2.5 space-y-1">
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-xs font-extrabold text-slate-900 truncate">{{ vendor_user.full_name }}</span>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ 'bg-emerald-100 text-emerald-700' if vendor_user.is_verified else 'bg-amber-100 text-amber-800' }}">
+            {{ "✓ Verified" if vendor_user.is_verified else "Pending KYC" }}
+          </span>
+        </div>
+        <div class="text-[11px] text-slate-500 truncate">{{ vendor_user.email }}</div>
+        <div class="text-[11px] font-mono text-slate-400">{{ vendor_user.phone_number }}</div>
+      </div>
+
+      <form method="post" action="/logout">
+        <button type="submit"
+                class="w-full bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-bold py-2 rounded-xl text-xs transition">
+          Sign Out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- TOP BAR -->
+    <header class="bg-white/90 backdrop-blur border-b border-slate-200/70 px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-20">
+      <div>
+        <h1 class="text-lg sm:text-xl font-extrabold text-slate-900">
+          Product Owner &amp; Seller Portal
+        </h1>
+        <p class="text-xs text-slate-500">
+          Manage your bilingual (English / አማርኛ) children's products, stock levels, and Addis Ababa customer orders.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <button type="button" onclick="showSellerPanel('add-product')"
+                class="bg-honey hover:bg-[#e59326] text-slate-900 font-extrabold px-4 py-2 rounded-xl text-xs transition">
+          + New Product
+        </button>
+        <a href="/seller/orders/export-csv"
+           class="bg-nile hover:bg-[#125563] text-white font-bold px-4 py-2 rounded-xl text-xs transition">
+          📥 Export My Orders CSV
+        </a>
+      </div>
+    </header>
+
+    <main class="p-6 lg:p-8 space-y-6">
+
+      {% if message %}
+      <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-xs font-semibold flex items-center justify-between">
+        <span>✅ {{ message }}</span>
+        <a href="/seller" class="underline font-bold">Dismiss</a>
+      </div>
+      {% endif %}
+
+      {% if error %}
+      <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl text-xs font-semibold flex items-center justify-between">
+        <span>⚠️ {{ error }}</span>
+        <a href="/seller" class="underline font-bold">Dismiss</a>
+      </div>
+      {% endif %}
+
+      <!-- 4 SELLER KPI CARDS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs">
+          <div class="text-xs font-bold text-slate-500">My Active Listings</div>
+          <div class="text-2xl font-extrabold text-slate-900 mt-1.5">
+            {{ kpis.active_products }} <span class="text-xs font-semibold text-slate-400">/ {{ kpis.total_products }} SKUs</span>
+          </div>
+          <div class="text-[11px] text-sage font-bold mt-1">{{ kpis.local_share_pct }}% Made in Ethiopia</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs">
+          <div class="text-xs font-bold text-slate-500">Total Units Sold</div>
+          <div class="text-2xl font-extrabold text-nile mt-1.5">{{ kpis.total_units_sold }}</div>
+          <div class="text-[11px] text-slate-400 mt-1">Across {{ kpis.total_orders }} customer order(s)</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs">
+          <div class="text-xs font-bold text-slate-500">Gross Seller Sales (Incl. VAT)</div>
+          <div class="text-2xl font-extrabold text-slate-900 mt-1.5">
+            {{ "{:,.2f}".format(kpis.gross_sales_etb) }} <span class="text-xs font-bold text-slate-400">ETB</span>
+          </div>
+          <div class="text-[11px] text-emerald-600 font-semibold mt-1">{{ "{:,.2f}".format(kpis.paid_sales_etb) }} ETB settled</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-2xs">
+          <div class="text-xs font-bold text-slate-500">Net Earnings (Excl. 15% VAT)</div>
+          <div class="text-2xl font-extrabold text-emerald-700 mt-1.5">
+            {{ "{:,.2f}".format(kpis.net_excl_vat_etb) }} <span class="text-xs font-bold text-slate-400">ETB</span>
+          </div>
+          <div class="text-[11px] text-slate-400 mt-1">15% MoR VAT: {{ "{:,.2f}".format(kpis.vat_15_etb) }} ETB</div>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- PANEL 1: MY BILINGUAL PRODUCTS CATALOG                           -->
+      <!-- ================================================================ -->
+      <section id="panel-my-products" class="seller-panel bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">My Bilingual Product Listings (EN / አማ)</h2>
+            <p class="text-xs text-slate-500">Update your ETB pricing, available stock, bilingual titles, or active storefront visibility.</p>
+          </div>
+          <button type="button" onclick="showSellerPanel('add-product')"
+                  class="bg-nile hover:bg-[#125563] text-white font-bold px-3.5 py-2 rounded-xl text-xs transition">
+            + Add New Product
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 uppercase text-[10px] bg-slate-50">
+                <th class="py-3 px-2.5">Product &amp; SKU</th>
+                <th class="py-3 px-2.5">Origin / Stage</th>
+                <th class="py-3 px-2.5 text-center">Sold</th>
+                <th class="py-3 px-2.5">Edit Bilingual Titles, Price (ETB), Stock &amp; Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for p in my_products %}
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-2.5">
+                  <div class="flex items-center gap-3">
+                    <img src="{{ p.image_url }}" alt="{{ p.title_en }}"
+                         class="w-12 h-12 rounded-xl object-cover bg-slate-100 border border-slate-200 shrink-0" />
+                    <div>
+                      <div class="font-mono font-bold text-nile text-[11px]">{{ p.sku }}</div>
+                      <div class="text-[11px] text-slate-500">{{ p.category.value }}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="py-3 px-2.5 whitespace-nowrap">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ 'bg-emerald-100 text-emerald-700' if p.origin_type.value == 'LOCAL_ETHIOPIAN' else 'bg-slate-100 text-slate-600' }}">
+                    {{ "Made in Ethiopia" if p.origin_type.value == "LOCAL_ETHIOPIAN" else "Imported" }}
+                  </span>
+                  <div class="text-[11px] text-slate-500 mt-1">Age: <strong>{{ p.age_range.value }}</strong></div>
+                </td>
+
+                <td class="py-3 px-2.5 text-center font-extrabold text-slate-800">
+                  {{ sold_by_product.get(p.id, 0) }} pcs
+                </td>
+
+                <td class="py-3 px-2.5">
+                  <form method="post" action="/seller/products/{{ p.id }}/update" class="flex flex-wrap items-center gap-2">
+                    <input type="text" name="title_en" value="{{ p.title_en }}" required title="English Title"
+                           class="w-40 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold" />
+                    <input type="text" name="title_am" value="{{ p.title_am }}" required title="Amharic Title"
+                           class="w-40 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs" />
+                    <input type="number" step="0.01" name="price_etb" value="{{ p.price_etb }}" required title="Price (ETB)"
+                           class="w-24 border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-mono" />
+                    <input type="number" name="stock_count" value="{{ p.stock_count }}" required title="Stock Count"
+                           class="w-20 border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-mono" />
+                    <select name="is_active" class="border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold {{ 'text-emerald-700' if p.is_active else 'text-slate-500' }}">
+                      <option value="true" {% if p.is_active %}selected{% endif %}>Active</option>
+                      <option value="false" {% if not p.is_active %}selected{% endif %}>Hidden</option>
+                    </select>
+                    <button type="submit"
+                            class="bg-nile hover:bg-[#125563] text-white font-bold px-3 py-1.5 rounded-lg transition">
+                      Save
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="4" class="py-10 text-center text-slate-400">
+                  You have not listed any products yet.
+                  <button type="button" onclick="showSellerPanel('add-product')" class="text-nile font-bold underline ml-1">
+                    Add your first bilingual product now →
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- PANEL 2: ADD NEW BILINGUAL PRODUCT                               -->
+      <!-- ================================================================ -->
+      <section id="panel-add-product" class="seller-panel hidden bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs space-y-4">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">+ Publish New Bilingual Product (EN / አማ)</h2>
+          <p class="text-xs text-slate-500">
+            All prices are in Ethiopian Birr (ETB) inclusive of 15% MoR VAT. Products marked <strong>LOCAL_ETHIOPIAN</strong> count toward Proclamation No. 1205/2020 local content targets.
+          </p>
+        </div>
+
+        <form method="post" action="/seller/products/create" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Unique SKU Code *</label>
+            <input type="text" name="sku" required placeholder="VND-{{ vendor_user.id }}-001"
+                   class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono uppercase" />
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Product Title (English) *</label>
+            <input type="text" name="title_en" required placeholder="Handwoven Ethiopian Cotton Swaddle"
+                   class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Product Title (አማርኛ) *</label>
+            <input type="text" name="title_am" required placeholder="በእጅ የተሸመነ የኢትዮጵያ ጥጥ መጠቅለያ"
+                   class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+          </div>
+
+          <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Description (English) *</label>
+              <textarea name="description_en" rows="2" required placeholder="Breathable 100% highland cotton, gentle for newborn skin."
+                        class="w-full border border-slate-300 rounded-xl px-3 py-2"></textarea>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Description (አማርኛ) *</label>
+              <textarea name="description_am" rows="2" required placeholder="100% የኢትዮጵያ ጥጥ፣ ለጨቅላ ሕፃናት ቆዳ ተስማሚ።"
+                        class="w-full border border-slate-300 rounded-xl px-3 py-2"></textarea>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Category *</label>
+            <select name="category" class="w-full border border-slate-300 rounded-xl px-3 py-2">
+              {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Child Age Stage *</label>
+            <select name="age_range" class="w-full border border-slate-300 rounded-xl px-3 py-2">
+              {% for a in age_ranges %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Origin (Proc. 1205/2020) *</label>
+            <select name="origin_type" class="w-full border border-slate-300 rounded-xl px-3 py-2">
+              {% for o in origin_types %}<option value="{{ o }}">{{ o }}</option>{% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Unit Price (ETB, Incl. 15% VAT) *</label>
+            <input type="number" step="0.01" min="1" name="price_etb" required placeholder="1650.00"
+                   class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono" />
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Available Stock Quantity *</label>
+            <input type="number" min="0" name="stock_count" required value="15"
+                   class="w-full border border-slate-300 rounded-xl px-3 py-2 font-mono" />
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Storefront Thumbnail Preset</label>
+            <select name="thumbnail_preset" class="w-full border border-slate-300 rounded-xl px-3 py-2">
+              {% for path, label in thumbnails %}
+              <option value="{{ path }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block font-semibold text-slate-700 mb-1">Custom Image URL (Optional — overrides preset if filled)</label>
+            <input type="text" name="image_url" placeholder="https://... or leave blank to use selected preset"
+                   class="w-full border border-slate-300 rounded-xl px-3 py-2" />
+          </div>
+
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <label class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
+              <input type="checkbox" name="safety_certified" value="true" checked class="rounded border-slate-300" />
+              Safety Certified
+            </label>
+            <label class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
+              <input type="checkbox" name="is_hygiene_sealed" value="true" class="rounded border-slate-300" />
+              Hygiene Sealed
+            </label>
+            <label class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
+              <input type="checkbox" name="is_starter_bundle" value="true" class="rounded border-slate-300" />
+              Newborn Bundle
+            </label>
+          </div>
+
+          <div class="md:col-span-3 pt-2 flex justify-end gap-3">
+            <button type="button" onclick="showSellerPanel('my-products')"
+                    class="px-5 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-700 hover:bg-slate-50">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="bg-nile hover:bg-[#125563] text-white font-bold px-6 py-2.5 rounded-xl transition">
+              Publish Bilingual Product
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- PANEL 3: CUSTOMER ORDERS CONTAINING MY ITEMS                     -->
+      <!-- ================================================================ -->
+      <section id="panel-my-orders" class="seller-panel hidden bg-white rounded-2xl p-6 border border-slate-200/70 shadow-2xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">Customer Orders Containing Your Products</h2>
+            <p class="text-xs text-slate-500">Showing only the line items belonging to <strong>{{ vendor_user.full_name }}</strong>.</p>
+          </div>
+          <a href="/seller/orders/export-csv"
+             class="bg-honey hover:bg-[#e59326] text-slate-900 font-bold px-3.5 py-2 rounded-xl text-xs transition">
+            📥 Download My Fulfillment CSV
+          </a>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-400 uppercase text-[10px] bg-slate-50">
+                <th class="py-3 px-2.5">Order &amp; Date</th>
+                <th class="py-3 px-2.5">Addis Ababa Destination</th>
+                <th class="py-3 px-2.5">Your Ordered Items</th>
+                <th class="py-3 px-2.5 text-right">Your Subtotal (ETB)</th>
+                <th class="py-3 px-2.5">Payment</th>
+                <th class="py-3 px-2.5">Dispatch Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for o in seller_orders %}
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-2.5 whitespace-nowrap">
+                  <div class="font-bold text-nile">{{ o.order_number }}</div>
+                  <div class="text-[10px] text-slate-400 font-mono">{{ o.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+                </td>
+
+                <td class="py-3 px-2.5">
+                  <div class="font-bold text-slate-800">{{ o.recipient_name }}</div>
+                  <div class="text-[11px] text-slate-500">{{ o.sub_city }}{% if o.woreda %} (Woreda {{ o.woreda }}){% endif %}</div>
+                </td>
+
+                <td class="py-3 px-2.5">
+                  <ul class="space-y-1">
+                    {% for item in o.items %}
+                    <li class="text-slate-700">
+                      <span class="font-extrabold text-slate-900">{{ item.quantity }}x</span>
+                      {{ item.product.title_en }}
+                      <span class="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">{{ item.product.sku }}</span>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </td>
+
+                <td class="py-3 px-2.5 text-right font-mono font-extrabold text-slate-900">
+                  {{ "{:,.2f}".format(o.vendor_subtotal_etb) }}
+                </td>
+
+                <td class="py-3 px-2.5 whitespace-nowrap">
+                  <div class="font-semibold">{{ o.payment_method }}</div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ 'bg-emerald-100 text-emerald-700' if o.payment_status == 'PAID' else 'bg-amber-100 text-amber-800' }}">
+                    {{ o.payment_status }}
+                  </span>
+                </td>
+
+                <td class="py-3 px-2.5 whitespace-nowrap">
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-800">
+                    {{ o.status }}
+                  </span>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="py-10 text-center text-slate-400">
+                  No customer orders have been placed for your products yet.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  function showSellerPanel(panelKey) {
+    const valid = ["my-products", "add-product", "my-orders"];
+    if (!valid.includes(panelKey)) panelKey = "my-products";
+
+    document.querySelectorAll(".seller-panel").forEach((el) => {
+      el.classList.toggle("hidden", el.id !== `panel-${panelKey}`);
+    });
+
+    document.querySelectorAll(".seller-nav-btn").forEach((btn) => {
+      const active = btn.dataset.panel === panelKey;
+      btn.classList.toggle("bg-nile", active);
+      btn.classList.toggle("text-white", active);
+      btn.classList.toggle("font-bold", active);
+      btn.classList.toggle("text-slate-600", !active);
+      btn.classList.toggle("font-semibold", !active);
+    });
+
+    history.replaceState(null, "", `#${panelKey}`);
+  }
+
+  document.querySelectorAll(".seller-nav-btn").forEach((btn) => {
+    btn.addEventListener("click", () => showSellerPanel(btn.dataset.panel));
+  });
+
+  const initialPanel = window.location.hash.replace("#", "");
+  if (initialPanel) {
+    showSellerPanel(initialPanel);
+  }
+</script>
+
+</body>
+</html>
