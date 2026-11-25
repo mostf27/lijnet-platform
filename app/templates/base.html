@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}{{ t.brand_name }} ({{ t.brand_am }}) — {{ t.tagline }}{% endblock %}</title>
+
+  <!-- Bilingual Fonts: Plus Jakarta Sans, Inter, and Noto Sans Ethiopic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Ethiopic:wght@400;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN & HTMX for low-bandwidth, server-rendered interactivity -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            nile: '#16697A',
+            honey: '#F4A236',
+            terracotta: '#E06D53',
+            sage: '#6B9080',
+            cream: '#FAF7F2',
+            ink: '#1F2933',
+          },
+          fontFamily: {
+            heading: ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'sans-serif'],
+            body: ['Inter', '"Noto Sans Ethiopic"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-cream text-ink font-body min-h-screen flex flex-col">
+
+  <!-- Top Trust Bar -->
+  <div class="bg-nile text-white text-xs py-1.5 px-4">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <span>🛡️ {{ t.verified_badge }} &bull; Addis Ababa Same-Day / Next-Day Landmark Delivery</span>
+      <span class="font-medium text-honey">Free Delivery &ge; 4,000 {{ t.etb }} &bull; @lijnet_et</span>
+    </div>
+  </div>
+
+  <!-- Primary Navigation -->
+  <header class="bg-white border-b border-stone-200 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      <a href="/" class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-nile text-honey font-heading font-extrabold text-xl flex items-center justify-center shadow-sm">
+          ል
+        </div>
+        <div class="leading-tight">
+          <div class="font-heading font-extrabold text-lg text-nile">
+            Lijnet <span class="text-honey font-bold">ልጅነት</span>
+          </div>
+          <div class="text-[11px] text-stone-500 hidden sm:block">{{ t.tagline }}</div>
+        </div>
+      </a>
+
+      <nav class="flex items-center gap-4 text-sm font-medium">
+        <a href="/" class="hover:text-nile transition">{{ t.nav_home }}</a>
+        <a href="/#starter-bundles" class="hover:text-nile transition hidden md:inline">{{ t.nav_bundles }}</a>
+        <a href="/orders" class="hover:text-nile transition">{{ t.nav_orders }}</a>
+        <a href="/admin" class="hover:text-nile transition text-stone-600">{{ t.nav_admin }}</a>
+
+        <!-- Bilingual Switcher -->
+        <div class="flex items-center rounded-lg border border-stone-200 overflow-hidden text-xs">
+          <a href="/set-language/en" class="px-2.5 py-1 {% if lang == 'en' %}bg-nile text-white font-semibold{% else %}bg-white text-stone-600 hover:bg-stone-100{% endif %}">EN</a>
+          <a href="/set-language/am" class="px-2.5 py-1 {% if lang == 'am' %}bg-nile text-white font-semibold{% else %}bg-white text-stone-600 hover:bg-stone-100{% endif %}">አማ</a>
+        </div>
+
+        <!-- Cart Link with HTMX Badge Target -->
+        <a href="/checkout" class="inline-flex items-center bg-nile hover:bg-[#125563] text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition">
+          🛒 {{ t.nav_cart }}
+          <span id="cart-badge" class="ml-1.5 inline-flex items-center justify-center rounded-full bg-terracotta px-2 py-0.5 text-xs font-bold text-white">
+            {{ cart.total_qty if cart else 0 }}
+          </span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-ink text-stone-300 mt-12 py-8 px-4 text-sm">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <div class="font-heading font-bold text-white text-base">Lijnet <span class="text-honey">ልጅነት</span></div>
+        <p class="mt-2 text-xs text-stone-400">Lijnet Digital Commerce PLC (ልጅነት ዲጂታል ኮሜርስ ኃ/የተ/የግ/ማህበር) — Addis Ababa, Ethiopia.</p>
+      </div>
+      <div>
+        <div class="font-semibold text-white text-xs uppercase tracking-wider">Compliance &amp; Safety</div>
+        <p class="mt-2 text-xs text-stone-400">Operated in compliance with Ethiopia's Electronic Transaction Proclamation No. 1205/2020 (7-day statutory return window &amp; &ge;50% local Ethiopian offerings).</p>
+      </div>
+      <div>
+        <div class="font-semibold text-white text-xs uppercase tracking-wider">Local Payments &amp; Support</div>
+        <p class="mt-2 text-xs text-stone-400">Chapa &bull; Telebirr &bull; SantimPay &bull; CBE Transfer &bull; Cash on Delivery (Addis Ababa)</p>
+        <p class="mt-1 text-xs text-honey">Telegram: @lijnet_et &bull; lijnet.et</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}{{ t.checkout_title }} — {{ t.brand_name }}{% endblock %}
+{% block content %}
+
+<h1 class="font-heading text-2xl font-extrabold text-nile mb-6">{{ t.checkout_title }}</h1>
+
+{% if error %}
+<div class="mb-5 bg-terracotta/15 border border-terracotta text-terracotta px-4 py-3 rounded-xl text-sm font-medium">
+  ⚠️ {{ error }}
+</div>
+{% endif %}
+
+{% if not cart["items"] %}
+<div class="bg-white rounded-2xl border border-stone-200 p-10 text-center">
+  <p class="text-stone-600 mb-4">{{ t.cart_empty }}</p>
+  <a href="/" class="inline-block bg-nile text-white font-semibold px-6 py-2.5 rounded-lg text-sm">Browse Products</a>
+</div>
+{% else %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Left: Addis Ababa Landmark Delivery & Payment Form -->
+  <form method="post" action="/checkout/submit" class="lg:col-span-2 bg-white rounded-2xl border border-stone-200 p-6 space-y-5">
+    <h2 class="font-heading text-lg font-bold text-ink border-b pb-2">1. Addis Ababa Delivery Details</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-semibold text-stone-700 mb-1">{{ t.recipient_name }} *</label>
+        <input type="text" name="recipient_name" required placeholder="e.g., Selamawit Bekele"
+               class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-nile focus:outline-none" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-stone-700 mb-1">{{ t.recipient_phone }} *</label>
+        <input type="text" name="recipient_phone" required placeholder="+251911223344 or 0911223344"
+               class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-nile focus:outline-none" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-xs font-semibold text-stone-700 mb-1">{{ t.sub_city }} *</label>
+        <select name="sub_city"
+                hx-get="/cart/estimate"
+                hx-target="#order-totals"
+                hx-swap="outerHTML"
+                class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-nile">
+          {% for sc in sub_cities %}
+          <option value="{{ sc }}" {% if sc == cart.sub_city %}selected{% endif %}>{{ sc }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-stone-700 mb-1">{{ t.woreda }} *</label>
+        <input type="text" name="woreda" required placeholder="e.g., 03"
+               class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-nile" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-stone-700 mb-1">Email (for VAT Receipt)</label>
+        <input type="email" name="customer_email" value="parent@lijnet.et"
+               class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-nile" />
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold text-stone-700 mb-1">{{ t.landmark_description }} *</label>
+      <textarea name="landmark_description" required rows="2"
+                placeholder="e.g., Behind Bole Atlas Hotel, blue gate next to Dashen Bank"
+                class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-nile"></textarea>
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold text-stone-700 mb-1">{{ t.gps_coordinates }}</label>
+      <input type="text" name="gps_coordinates" placeholder="e.g., 8.9974,38.7867"
+             class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-nile" />
+    </div>
+
+    <h2 class="font-heading text-lg font-bold text-ink border-b pb-2 pt-2">2. {{ t.payment_method }}</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+      <label class="flex items-center gap-3 border rounded-xl p-3 cursor-pointer hover:border-nile">
+        <input type="radio" name="payment_method" value="CHAPA" checked class="accent-nile" />
+        <div>
+          <div class="font-bold">Chapa (Telebirr / CBE Birr / Cards)</div>
+          <div class="text-xs text-stone-500">Instant local &amp; diaspora checkout</div>
+        </div>
+      </label>
+      <label class="flex items-center gap-3 border rounded-xl p-3 cursor-pointer hover:border-nile">
+        <input type="radio" name="payment_method" value="TELEBIRR" class="accent-nile" />
+        <div>
+          <div class="font-bold">Telebirr Direct</div>
+          <div class="text-xs text-stone-500">Ethio Telecom mobile wallet</div>
+        </div>
+      </label>
+      <label class="flex items-center gap-3 border rounded-xl p-3 cursor-pointer hover:border-nile">
+        <input type="radio" name="payment_method" value="SANTIMPAY" class="accent-nile" />
+        <div>
+          <div class="font-bold">SantimPay</div>
+          <div class="text-xs text-stone-500">Ethiopian local payment gateway</div>
+        </div>
+      </label>
+      <label class="flex items-center gap-3 border rounded-xl p-3 cursor-pointer hover:border-nile">
+        <input type="radio" name="payment_method" value="CBE_TRANSFER" class="accent-nile" />
+        <div>
+          <div class="font-bold">CBE Direct Bank Transfer</div>
+          <div class="text-xs text-stone-500">Best for high-ticket nursery gear</div>
+        </div>
+      </label>
+      <label class="flex items-center gap-3 border rounded-xl p-3 cursor-pointer hover:border-nile sm:col-span-2">
+        <input type="radio" name="payment_method" value="COD" class="accent-nile" />
+        <div>
+          <div class="font-bold">Cash on Delivery (COD)</div>
+          <div class="text-xs text-stone-500">Pay rider in cash or Telebirr at your gate (Max {{ "{:,.0f}".format(cod_limit) }} {{ t.etb }})</div>
+        </div>
+      </label>
+    </div>
+
+    <button type="submit" class="w-full bg-nile hover:bg-[#125563] text-white font-bold py-3 rounded-xl text-sm transition shadow-sm">
+      {{ t.place_order }}
+    </button>
+  </form>
+
+  <!-- Right: Cart Summary & Live Delivery Fee Estimate -->
+  <div class="bg-white rounded-2xl border border-stone-200 p-6 h-fit">
+    <h2 class="font-heading text-lg font-bold text-ink mb-4">{{ t.cart_title }}</h2>
+
+    <div class="space-y-4 mb-4">
+      {% for entry in cart["items"] %}
+      <div class="flex items-start justify-between gap-3 text-sm border-b border-stone-100 pb-3">
+        <div>
+          <div class="font-semibold text-ink">{{ entry.product.title }}</div>
+          <div class="text-xs text-stone-500">{{ "{:,.2f}".format(entry.product.price_etb) }} {{ t.etb }} &times; {{ entry.quantity }}</div>
+          <form method="post" action="/cart/update" class="mt-1.5 flex items-center gap-1.5">
+            <input type="hidden" name="product_id" value="{{ entry.product.id }}" />
+            <input type="number" name="quantity" value="{{ entry.quantity }}" min="0" max="{{ entry.product.stock_count }}"
+                   class="w-14 border rounded px-1.5 py-0.5 text-xs text-center" />
+            <button type="submit" class="text-[11px] text-nile font-semibold hover:underline">Update</button>
+          </form>
+        </div>
+        <div class="font-bold text-ink whitespace-nowrap">{{ "{:,.2f}".format(entry.line_total_etb) }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="order-totals" class="space-y-2 border-t pt-4 text-sm">
+      <div class="flex justify-between">
+        <span>{{ t.subtotal }}</span>
+        <span class="font-medium">{{ "{:,.2f}".format(cart.subtotal_etb) }} {{ t.etb }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span>{{ t.delivery_fee }} ({{ cart.sub_city }})</span>
+        <span class="font-medium text-nile">
+          {% if cart.free_delivery_applied %}{{ t.free_delivery }}{% else %}{{ "{:,.2f}".format(cart.delivery_fee_etb) }} {{ t.etb }}{% endif %}
+        </span>
+      </div>
+      <div class="flex justify-between border-t pt-2 text-base font-bold text-ink">
+        <span>{{ t.total }}</span>
+        <span>{{ "{:,.2f}".format(cart.total_etb) }} {{ t.etb }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

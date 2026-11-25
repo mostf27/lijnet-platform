@@ -1,0 +1,30 @@
+﻿# Python & Virtual Environments
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+
+# Secrets & Environment Files
+.env
+.env.prod
+*.pem
+*.key
+
+# Local Databases, Logs & Generated Test Files
+*.db
+*.sqlite3
+*.log
+Lijnet_VAT_Invoice_Test.pdf
+
+# Flet / Mobile Build Outputs
+mobile_py/build/
+mobile_py/.flet/
+
+# OS & IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

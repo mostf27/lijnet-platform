@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Hero Banner -->
+<section class="bg-nile text-white rounded-2xl p-6 md:p-10 mb-8 shadow-sm">
+  <div class="max-w-2xl">
+    <span class="inline-block bg-honey text-ink text-xs font-bold px-3 py-1 rounded-full mb-3">
+      {{ t.verified_badge }}
+    </span>
+    <h1 class="font-heading text-2xl md:text-4xl font-extrabold leading-tight">
+      {{ t.hero_title }}
+    </h1>
+    <p class="mt-3 text-stone-100 text-sm md:text-base">
+      {{ t.hero_subtitle }}
+    </p>
+
+    <!-- Search Bar -->
+    <form method="get" action="/" class="mt-5 flex gap-2">
+      <input
+        type="text"
+        name="q"
+        value="{{ search_query }}"
+        placeholder="Search diapers, Ethiopian cotton, ዳይፐር, ፊደል..."
+        class="flex-1 rounded-lg px-4 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-honey"
+      />
+      <button type="submit" class="bg-honey hover:bg-[#e59326] text-ink font-bold px-5 py-2.5 rounded-lg text-sm transition">
+        Search
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- Age-Group Quick Filters -->
+<section class="mb-8">
+  <div class="flex flex-wrap items-center gap-2">
+    <a href="/" class="px-3.5 py-2 rounded-full text-xs font-semibold border transition {% if not active_age %}bg-nile text-white border-nile{% else %}bg-white text-ink border-stone-200 hover:border-nile{% endif %}">
+      {{ t.filter_all_ages }}
+    </a>
+    {% for ar in age_ranges %}
+      <a href="/?age={{ ar }}{% if active_category %}&category={{ active_category }}{% endif %}"
+         class="px-3.5 py-2 rounded-full text-xs font-semibold border transition {% if active_age == ar %}bg-nile text-white border-nile{% else %}bg-white text-ink border-stone-200 hover:border-nile{% endif %}">
+        {{ ar }}
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Newborn Starter Bundles Highlight -->
+{% if bundles and not active_age and not search_query %}
+<section id="starter-bundles" class="mb-10 bg-white border border-honey/40 rounded-2xl p-5">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="font-heading text-xl font-bold text-nile">🎁 {{ t.section_starter_bundles }}</h2>
+    <span class="text-xs font-semibold text-terracotta">Ideal for Baby Showers &amp; Ares Visits</span>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    {% for item in bundles %}
+    <div class="border border-stone-200 rounded-xl p-4 flex flex-col justify-between bg-cream/60">
+      <div>
+        <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" class="w-full h-40 object-cover rounded-lg mb-3" />
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          {% if item.is_local %}
+          <span class="bg-sage text-white text-[11px] font-semibold px-2 py-0.5 rounded-full">🇪🇹 {{ t.made_in_ethiopia }}</span>
+          {% else %}
+          <span class="bg-nile/10 text-nile text-[11px] font-semibold px-2 py-0.5 rounded-full">{{ t.imported_verified }}</span>
+          {% endif %}
+          <span class="bg-stone-200 text-ink text-[11px] font-medium px-2 py-0.5 rounded-full">{{ item.age_range }}</span>
+        </div>
+        <a href="/products/{{ item.id }}" class="font-heading font-bold text-sm text-ink hover:text-nile line-clamp-2">{{ item.title }}</a>
+      </div>
+      <div class="mt-3 pt-3 border-t border-stone-200 flex items-center justify-between">
+        <span class="font-bold text-nile text-sm">{{ "{:,.2f}".format(item.price_etb) }} {{ t.etb }}</span>
+        <form hx-post="/cart/add" hx-target="#cart-badge" hx-swap="outerHTML">
+          <input type="hidden" name="product_id" value="{{ item.id }}" />
+          <input type="hidden" name="quantity" value="1" />
+          <button type="submit" class="bg-terracotta hover:bg-[#cc5c43] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+            + {{ t.add_to_cart }}
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Main Product Catalog -->
+<section>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="font-heading text-xl font-bold text-ink">{{ t.section_catalog }}</h2>
+    <span class="text-xs text-stone-500">{{ products | length }} items</span>
+  </div>
+
+  {% if not products %}
+  <div class="bg-white rounded-xl p-8 text-center text-stone-500 border border-stone-200">
+    No products match your current filter. <a href="/" class="text-nile font-semibold underline">Reset filters</a>.
+  </div>
+  {% else %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    {% for item in products %}
+    <div class="bg-white border border-stone-200 rounded-xl overflow-hidden flex flex-col justify-between shadow-sm hover:shadow-md transition">
+      <div>
+        <a href="/products/{{ item.id }}">
+          <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" class="w-full h-44 object-cover" />
+        </a>
+        <div class="p-4">
+          <div class="flex flex-wrap gap-1.5 mb-2">
+            {% if item.is_local %}
+            <span class="bg-sage text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">🇪🇹 {{ t.made_in_ethiopia }}</span>
+            {% else %}
+            <span class="bg-stone-100 text-stone-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">{{ t.imported_verified }}</span>
+            {% endif %}
+            <span class="bg-honey/20 text-ink text-[10px] font-semibold px-2 py-0.5 rounded-full">{{ item.age_range }}</span>
+          </div>
+
+          <a href="/products/{{ item.id }}" class="font-heading font-bold text-sm text-ink hover:text-nile line-clamp-2">
+            {{ item.title }}
+          </a>
+
+          {% if item.safety_certified %}
+          <p class="mt-1.5 text-[11px] text-nile font-medium">✓ {{ t.verified_badge }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="px-4 pb-4 pt-2 flex items-center justify-between border-t border-stone-100">
+        <div>
+          <div class="font-bold text-base text-ink">{{ "{:,.2f}".format(item.price_etb) }} <span class="text-xs font-normal">{{ t.etb }}</span></div>
+          <div class="text-[11px] {% if item.stock_count > 0 %}text-sage{% else %}text-terracotta{% endif %}">
+            {% if item.stock_count > 0 %}{{ t.in_stock }} ({{ item.stock_count }}){% else %}{{ t.out_of_stock }}{% endif %}
+          </div>
+        </div>
+        {% if item.stock_count > 0 %}
+        <form hx-post="/cart/add" hx-target="#cart-badge" hx-swap="outerHTML">
+          <input type="hidden" name="product_id" value="{{ item.id }}" />
+          <input type="hidden" name="quantity" value="1" />
+          <button type="submit" class="bg-terracotta hover:bg-[#cc5c43] text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+            {{ t.add_to_cart }}
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

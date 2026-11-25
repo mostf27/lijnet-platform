@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}{{ t.admin_title }} — {{ t.brand_name }}{% endblock %}
+{% block content %}
+
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="font-heading text-2xl font-extrabold text-nile">{{ t.admin_title }}</h1>
+    <p class="text-xs text-stone-500">Signed in as <strong>{{ admin_user.full_name }}</strong> ({{ admin_user.email }})</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <a href="/admin/orders/export-csv" class="bg-honey hover:bg-[#e59326] text-ink font-bold px-4 py-2 rounded-lg text-xs shadow-sm transition">
+      📥 Export Addis Rider Dispatch CSV
+    </a>
+    <form method="post" action="/admin/logout">
+      <button type="submit" class="bg-stone-200 hover:bg-stone-300 text-ink font-semibold px-3.5 py-2 rounded-lg text-xs transition">
+        Logout
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if message %}
+<div class="mb-5 bg-sage/20 border border-sage text-ink px-4 py-3 rounded-xl text-sm font-semibold">
+  ✅ {{ message }}
+</div>
+{% endif %}
+
+<!-- Proclamation No. 1205/2020 Local Content Compliance Dashboard -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white rounded-xl border border-stone-200 p-4">
+    <div class="text-xs text-stone-500">Total Active SKUs</div>
+    <div class="text-2xl font-extrabold text-ink mt-1">{{ compliance.total_active_products }}</div>
+  </div>
+  <div class="bg-white rounded-xl border border-stone-200 p-4">
+    <div class="text-xs text-stone-500">🇪🇹 Local Ethiopian SKUs</div>
+    <div class="text-2xl font-extrabold text-sage mt-1">{{ compliance.local_ethiopian_count }} ({{ compliance.local_percentage }}%)</div>
+  </div>
+  <div class="bg-white rounded-xl border border-stone-200 p-4">
+    <div class="text-xs text-stone-500">Imported SKUs</div>
+    <div class="text-2xl font-extrabold text-nile mt-1">{{ compliance.imported_count }} ({{ compliance.imported_percentage }}%)</div>
+  </div>
+  <div class="rounded-xl border p-4 {% if compliance.is_compliant %}bg-sage/15 border-sage{% else %}bg-terracotta/15 border-terracotta{% endif %}">
+    <div class="text-xs font-semibold">Proc. 1205/2020 (&ge;50% Local)</div>
+    <div class="text-xl font-extrabold mt-1 {% if compliance.is_compliant %}text-sage{% else %}text-terracotta{% endif %}">
+      {% if compliance.is_compliant %}COMPLIANT ✓{% else %}ACTION NEEDED ⚠️{% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Courier Dispatch Table -->
+<section class="bg-white rounded-2xl border border-stone-200 p-5 mb-8">
+  <h2 class="font-heading text-lg font-bold text-ink mb-4">🚚 Addis Ababa Order Dispatch Queue</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-xs text-left border-collapse">
+      <thead>
+        <tr class="bg-cream border-b border-stone-200 text-ink">
+          <th class="py-2.5 px-3">Order</th>
+          <th class="py-2.5 px-3">Sub-City &amp; Landmark</th>
+          <th class="py-2.5 px-3">Payment</th>
+          <th class="py-2.5 px-3">Total (ETB)</th>
+          <th class="py-2.5 px-3">Status Update</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-stone-100">
+        {% for o in orders %}
+        <tr>
+          <td class="py-2.5 px-3 font-bold text-nile">{{ o.order_number }}</td>
+          <td class="py-2.5 px-3">
+            <div class="font-semibold">{{ o.delivery_address.sub_city }} (Woreda {{ o.delivery_address.woreda }})</div>
+            <div class="text-stone-500">{{ o.delivery_address.landmark_description }}</div>
+            <div class="text-stone-600">{{ o.delivery_address.recipient_name }} &bull; {{ o.delivery_address.recipient_phone }}</div>
+          </td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold">{{ o.payment_method.value }}</span><br/>
+            <span class="text-[11px] text-stone-500">{{ o.payment_status.value }}</span>
+          </td>
+          <td class="py-2.5 px-3 font-bold">{{ "{:,.2f}".format(o.total_etb) }}</td>
+          <td class="py-2.5 px-3">
+            <form method="post" action="/admin/orders/{{ o.id }}/status" class="flex items-center gap-1.5">
+              <select name="status" class="border border-stone-300 rounded px-2 py-1 text-xs bg-white">
+                {% for st in order_statuses %}
+                <option value="{{ st }}" {% if o.status.value == st %}selected{% endif %}>{{ st }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="bg-nile text-white px-2.5 py-1 rounded text-xs font-semibold">Save</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Bilingual Product Creation Form -->
+<section class="bg-white rounded-2xl border border-stone-200 p-5 mb-8">
+  <h2 class="font-heading text-lg font-bold text-ink mb-4">➕ Add New Bilingual Product</h2>
+  <form method="post" action="/admin/products/create" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+    <input type="text" name="sku" required placeholder="SKU (e.g., LIJ-LOC-007)" class="border rounded-lg px-3 py-2" />
+    <input type="text" name="title_en" required placeholder="English Title" class="border rounded-lg px-3 py-2" />
+    <input type="text" name="title_am" required placeholder="የአማርኛ ርዕስ (Amharic Title)" class="border rounded-lg px-3 py-2" />
+
+    <textarea name="description_en" required placeholder="English Description" rows="2" class="border rounded-lg px-3 py-2 md:col-span-3"></textarea>
+    <textarea name="description_am" required placeholder="የአማርኛ መግለጫ (Amharic Description)" rows="2" class="border rounded-lg px-3 py-2 md:col-span-3"></textarea>
+
+    <select name="category" class="border rounded-lg px-3 py-2 bg-white">
+      {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+    </select>
+    <select name="age_range" class="border rounded-lg px-3 py-2 bg-white">
+      {% for a in age_ranges %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
+    </select>
+    <select name="origin_type" class="border rounded-lg px-3 py-2 bg-white">
+      {% for ot in origin_types %}<option value="{{ ot }}">{{ ot }}</option>{% endfor %}
+    </select>
+
+    <input type="number" step="0.01" name="price_etb" required placeholder="Price (ETB)" class="border rounded-lg px-3 py-2" />
+    <input type="number" name="stock_count" required placeholder="Stock Count" class="border rounded-lg px-3 py-2" />
+    <select name="vendor_id" class="border rounded-lg px-3 py-2 bg-white">
+      {% for v in vendors %}<option value="{{ v.id }}">{{ v.full_name }} ({{ v.role.value }})</option>{% endfor %}
+    </select>
+
+    <input type="url" name="image_url" placeholder="Product Image URL (optional)" class="border rounded-lg px-3 py-2 md:col-span-2" />
+    <button type="submit" class="bg-nile hover:bg-[#125563] text-white font-bold py-2 px-4 rounded-lg">
+      Create Product
+    </button>
+  </form>
+</section>
+
+<!-- Quick Inventory Editor -->
+<section class="bg-white rounded-2xl border border-stone-200 p-5">
+  <h2 class="font-heading text-lg font-bold text-ink mb-4">📦 Inventory &amp; Pricing Control</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-xs text-left border-collapse">
+      <thead>
+        <tr class="bg-cream border-b border-stone-200">
+          <th class="py-2 px-3">SKU</th>
+          <th class="py-2 px-3">Product (EN / AM)</th>
+          <th class="py-2 px-3">Origin</th>
+          <th class="py-2 px-3">Price &amp; Stock</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-stone-100">
+        {% for p in products %}
+        <tr>
+          <td class="py-2 px-3 font-mono font-semibold">{{ p.sku }}</td>
+          <td class="py-2 px-3">
+            <div class="font-semibold">{{ p.title_en }}</div>
+            <div class="text-stone-500">{{ p.title_am }}</div>
+          </td>
+          <td class="py-2 px-3">
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {% if p.origin_type.value == 'LOCAL_ETHIOPIAN' %}bg-sage text-white{% else %}bg-stone-100 text-stone-700{% endif %}">
+              {{ p.origin_type.value }}
+            </span>
+          </td>
+          <td class="py-2 px-3">
+            <form method="post" action="/admin/products/{{ p.id }}/stock" class="flex items-center gap-2">
+              <input type="number" step="0.01" name="price_etb" value="{{ p.price_etb }}" class="w-24 border rounded px-2 py-1" />
+              <input type="number" name="stock_count" value="{{ p.stock_count }}" class="w-16 border rounded px-2 py-1" />
+              <button type="submit" class="bg-sage text-white px-2.5 py-1 rounded font-semibold">Update</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

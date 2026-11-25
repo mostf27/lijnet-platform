@@ -1,0 +1,1 @@
+"""Pure-Python Flet Mobile Client for Lijnet (ልጅነት)."""

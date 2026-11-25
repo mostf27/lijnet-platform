@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ t.orders_title }} — {{ t.brand_name }}{% endblock %}
+{% block content %}
+
+<h1 class="font-heading text-2xl font-extrabold text-nile mb-5">{{ t.orders_title }}</h1>
+
+{% if payment_note %}
+<div class="mb-5 bg-nile/10 border border-nile text-nile px-4 py-3 rounded-xl text-sm font-semibold">
+  💳 {{ payment_note }}
+</div>
+{% endif %}
+
+{% if message %}
+<div class="mb-5 bg-sage/20 border border-sage text-ink px-4 py-3 rounded-xl text-sm font-semibold">
+  ✅ {{ message }}
+</div>
+{% endif %}
+
+{% if error %}
+<div class="mb-5 bg-terracotta/15 border border-terracotta text-terracotta px-4 py-3 rounded-xl text-sm font-semibold">
+  ⚠️ {{ error }}
+</div>
+{% endif %}
+
+<div class="space-y-5">
+  {% for entry in orders %}
+  {% set o = entry.order %}
+  <div class="bg-white rounded-2xl border {% if highlight == o.order_number %}border-honey ring-2 ring-honey/40{% else %}border-stone-200{% endif %} p-5 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
+      <div>
+        <span class="font-heading font-extrabold text-nile text-base">{{ o.order_number }}</span>
+        <span class="ml-2 text-xs text-stone-500">Ref: {{ o.tx_ref }}</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-bold">
+        <span class="px-2.5 py-1 rounded-full bg-stone-100 text-ink">{{ o.status.value }}</span>
+        <span class="px-2.5 py-1 rounded-full {% if o.payment_status.value == 'PAID' %}bg-sage text-white{% else %}bg-honey/30 text-ink{% endif %}">
+          {{ o.payment_method.value }} &bull; {{ o.payment_status.value }}
+        </span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-3 text-xs text-stone-600">
+      <div>
+        <div class="font-bold text-ink mb-1">Addis Ababa Delivery Landmark</div>
+        <p>{{ o.delivery_address.recipient_name }} ({{ o.delivery_address.recipient_phone }})</p>
+        <p>{{ o.delivery_address.sub_city }}, Woreda {{ o.delivery_address.woreda }} — {{ o.delivery_address.landmark_description }}</p>
+      </div>
+      <div>
+        <div class="font-bold text-ink mb-1">Items &amp; Total</div>
+        <ul class="space-y-0.5">
+          {% for item in o.items %}
+          <li>{{ item.quantity }}&times; {{ item.product.title_am if lang == 'am' else item.product.title_en }} ({{ "{:,.2f}".format(item.line_total_etb) }} {{ t.etb }})</li>
+          {% endfor %}
+        </ul>
+        <div class="mt-1 font-bold text-ink text-sm">Total: {{ "{:,.2f}".format(o.total_etb) }} {{ t.etb }}</div>
+        <div class="mt-2">
+          <a href="/orders/{{ o.id }}/invoice.pdf" target="_blank"
+             class="inline-flex items-center gap-1.5 bg-nile/10 hover:bg-nile/20 text-nile font-bold px-3 py-1.5 rounded-lg text-xs transition">
+            📄 Download 15% VAT Invoice (PDF)
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statutory 7-Day Cooling-Off Return Widget -->
+    <div class="mt-3 pt-3 border-t border-stone-100">
+      <div class="text-xs font-medium {% if entry.return_eligible %}text-sage{% else %}text-stone-500{% endif %} mb-2">
+        📜 {{ entry.return_note }}
+      </div>
+
+      {% if entry.return_eligible %}
+      <form method="post" action="/orders/{{ o.id }}/return" class="flex flex-wrap items-center gap-3 bg-cream p-3 rounded-xl">
+        <input type="text" name="reason" required placeholder="Reason (e.g., Wrong size, exchange requested)"
+               class="flex-1 min-w-[200px] border border-stone-300 rounded-lg px-3 py-1.5 text-xs" />
+        <label class="flex items-center gap-1.5 text-xs text-stone-700">
+          <input type="checkbox" name="hygiene_seal_broken" value="true" class="accent-terracotta" />
+          Hygiene seal opened?
+        </label>
+        <button type="submit" class="bg-terracotta hover:bg-[#cc5c43] text-white text-xs font-bold px-4 py-1.5 rounded-lg">
+          {{ t.request_return }}
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
